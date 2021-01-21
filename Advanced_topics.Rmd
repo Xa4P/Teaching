@@ -74,6 +74,20 @@ l_params_2 <- bootdist(f = dist_gamma,
                        parallel = "snow",
                        ncpus = detectCores() - 1) # perform 1000 non-parametric boostrapping, using parallelisation (all cores except 1)
 
+#### ALTERNATIVE: BOOTSTRAP DATA YOURSELF ####
+n_boot <- 1000 # determine number bootstrap samples
+m_params_2 <- matrix(NA, ncol = 2, nrow = n_boot,
+                     dimnames = list(c(1:n_boot),
+                                     c('shape', 'rate')))# create matrix to store parameters of bootstrap samples
+
+i <- 0
+set.seed(1234)
+for (i in c(1:n_boot)){ # use for loop to fill matrix
+  v_temp <- sample(groundbeef$serving, size = length(groundbeef$serving), replace = T) # create bootstrap samples of equal size as the variable and with replacement
+  m_params_2[i,] <- fitdist(v_temp, distr = "gamma")$estimate
+  }
+
+
 head(l_params_2$estim) # show parameters fitted to first  bootstrapped samples
 summary(l_params_2$estim) # show summary statistics of the parameters
 l_params_2$fitpart$cor # show correlation matrix between parameters
@@ -85,6 +99,19 @@ hist(l_params_2$estim[,"rate"], main = "Histogram rate parameter", xlab = "Rate 
 
 # plot rate vs shape
 ggplot(aes(x = shape, y = rate), data = as.data.frame(l_params_2$estim)) +
+  geom_point(colour = "darkgrey", shape = 1) +
+  stat_ellipse(type = "norm",#assumes multivariate normal distribution, 95%CI
+               colour = "darkblue",
+               level = 0.95, size = 1,
+               lty = 2) +
+   geom_point(aes(x = mean(shape), y = mean(rate)), 
+              colour = "orange",
+              size = 5,
+              shape = 17) + 
+  theme_bw()
+
+# plot rate vs shape: alternative bootstrapping
+ggplot(aes(x = shape, y = rate), data = as.data.frame(m_params_2)) +
   geom_point(colour = "darkgrey", shape = 1) +
   stat_ellipse(type = "norm",#assumes multivariate normal distribution, 95%CI
                colour = "darkblue",
