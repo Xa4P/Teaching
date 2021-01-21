@@ -2,11 +2,14 @@
 title: "Distributions"
 author: "X. Pouwels"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
-    toc: TRUE
-    toc_float: TRUE
-    toc_collapsed: TRUE
+    toc: yes
+    toc_collapsed: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -47,12 +50,12 @@ library(flexsurv)
 
 ## Inspect data set
 
-You can check the names of columns and the first columns by using the next commands. We will use the `groundbeef` data set. This data set contains one variable `serving` which represents the serving sizes collected in a French survey, for ground beef patties consumed by children under 5 years old. This data set is provided within the *fitdistrplus* package.
-
 ```{r, echo = TRUE}
 data("groundbeef") #load data
 names(groundbeef) # display names columns
 ``` 
+
+You can check the names of columns and the first columns by using the next commands. We will use the `groundbeef` data set. This data set contains one variable `serving` (N = `r length(groundbeef$serving)`) which represents the serving sizes of ground beef patties consumed by children under 5 years old, collected in a French survey. This data set is provided within the *fitdistrplus* package.
 
 ```{r, echo = TRUE}
 head(groundbeef) # show first 6 rows
@@ -128,25 +131,36 @@ rgamma(1, shape = dist_gamma$estimate["shape"], rate = dist_gamma$estimate["rate
 ## Three normally distributed variables
 ```{r, echo = TRUE}
 set.seed(1234)
+#create tgree variables which are correlated
 v_norm_1 <- rnorm(100, 3, 0.5)
-v_norm_2 <- rnorm(100, 5, 1.5)
-v_norm_3 <- rnorm(100, 9, 0.75)
+v_norm_2 <- v_norm_1 + rnorm(100, 5, 1.5)
+v_norm_3 <- 1/2 * v_norm_1 - 3/4 * v_norm_2
 
 m_vect <- cbind(v_norm_1,
                 v_norm_2,
                 v_norm_3) # create matrix from random variables
 
+
+plot(density(v_norm_1), col = 'red', xlim = c(-10, 15), ylim = c(0, 0.9), main = 'Density functions') # plot the different density functions
+lines(density(v_norm_2), col = 'darkgray')
+lines(density(v_norm_3), col = 'green')
+legend("topright",                    # Add legend to plot
+       legend = c("v_norm_1", "v_norm_2", "v_norm_3"),
+       col = c('red', 'darkgray', 'green'),
+       lty = 1)
+
 v_means <-  c(mean(v_norm_1), mean(v_norm_2), mean(v_norm_3)) # create vector of means
 m_cov <- cov(m_vect) # create covariance matrix
 
 v_means # shows vector of means
+cor(m_vect) # shows correlations matrix 
 m_cov # shows covariance matrix
 
-rmvnorm(n=5, mean = v_means, sigma = m_cov) # simultaneous random draw for each variable
+rmvnorm(n = 5, mean = v_means, sigma = m_cov) # simultaneous random draw for each variable
 ```
 
 # Fitting distributions based on summary statistics (method of moments)
-Often, you will only dispose of the summary statistics (mean and standard deviation) of a distribution instead of the individual patient level data to fit these statistical distributions. In those case, the method of moments can be used to calculate the parameters of the distribution based on these summary statistics.
+Often, you will only dispose of the summary statistics (mean and standard deviation) of a distribution instead of the individual patient level data to fit these statistical distributions. In those case, the method of moments can be used to calculate the parameters of the distribution based on these summary statistics. Of course, if you dispose of the patient level data, you would use the method described in the previous section!
 
 ## Gamma distribution
 Let's use our `groundbeef` example data set again.
@@ -225,8 +239,23 @@ And what if you only have the median and interquartile range values, how could y
 This can also be done using the `optim` package and function.
 ```{r, echo = TRUE}
 v_quantiles <- quantile(x = v_rbeta, probs = c(0.25, 0.5, 0.75))# compute first quantile, median, and third quantile
-dist <- get.beta.par(p = c(0.25, 0.5, 0.75), q = v_quantiles) # fit beta distribution based on quantiles
-dist
+v_quantiles
+dist_beta <- get.beta.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit beta distribution based on quantiles
+dist_beta
+```
+
+The above-fitted distribution matches the three percentiles quite nicely, because we have controlled the data generating process, by using a beta distribution. However, sometimes, you may not know which type of distribution is underlying the percentiles that you have identified in the literature. So, what would happen in case you do not fit an appropriate distribution, let's have a look! In the below code, we'll fit a lognormal distribution to the three percentiles
+
+```{r, echo = TRUE}
+dist_2 <- get.lnorm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit gamma distribution based on quantiles
+dist_2
+```
+
+As you can see from this graph, the distribution does not fits as nicely as the beta. If we fit a normal or loglogistic distribution, we may also get negative values (see below), which may not be suitable if the distribution should represent a probability for instance. Hence, always think about the properties of your input parameters before fitting a distribution using percentiles.
+
+```{r, echo = TRUE}
+dist_3 <- get.norm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit gamma distribution based on quantiles
+dist_3
 ```
 
 # Censored data
@@ -239,12 +268,24 @@ km_group <-survfit(km~group,data=bc,type='kaplan-meier',conf.type='log') # compu
 km_group # show survival estimates per group
 plot(km_group) # plot Kaplan-Meier curve per group
 
-surv_expo <- flexsurvreg(km~group, data = bc, dist = "expo")
-surv_weib <- flexsurvreg(km~group, data = bc, dist = "weibull")
-surv_gamma <- flexsurvreg(km~group, data = bc, dist = "gamma")
+dist_surv_expo <- flexsurvreg(km~group, data = bc, dist = "expo")
+dist_surv_weib <- flexsurvreg(km~group, data = bc, dist = "weibull")
+dist_surv_gamma <- flexsurvreg(km~group, data = bc, dist = "gamma")
 
-plot(surv_expo)
-plot(surv_weib)
-plot(surv_gamma)
+AIC(dist_surv_expo, dist_surv_weib, dist_surv_gamma) # compared Akaike Information Criterion (goodness-of-fit)
+
+# plot in comparison with data
+plot(dist_surv_expo, ylab = 'Survival probability', xlab = 'Time (in days)') 
+plot(dist_surv_weib, col = 'darkgray', ylab = 'Survival probability', xlab = 'Time (in days)')
+plot(dist_surv_gamma, col = 'lightblue', ylab = 'Survival probability', xlab = 'Time (in days)')
+
+plot(dist_surv_gamma, xlim = c(0, 5000), ylab = 'Survival probability', xlab = 'Time (in days)') # plot Kaplan-Meier curve per group
+lines(dist_surv_expo, t = c(0:5000))# plot extrapolation
+lines(dist_surv_weib, t = c(0:5000), col = 'darkgray')# plot extrapolation
+lines(dist_surv_gamma, t = c(0:5000), col = 'lightblue')# plot extrapolation
+legend("topright",                    # Add legend to plot
+       legend = c("exponential", "Weibull", "gamma"),
+       col = c('red', 'darkgray', 'lightblue'),
+       lty = 1)
 ```
 
