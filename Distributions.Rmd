@@ -131,7 +131,7 @@ rgamma(1, shape = dist_gamma$estimate["shape"], rate = dist_gamma$estimate["rate
 ## Three normally distributed variables
 ```{r, echo = TRUE}
 set.seed(1234)
-#create tgree variables which are correlated
+#create three variables which are correlated
 v_norm_1 <- rnorm(100, 3, 0.5)
 v_norm_2 <- v_norm_1 + rnorm(100, 5, 1.5)
 v_norm_3 <- 1/2 * v_norm_1 - 3/4 * v_norm_2
@@ -232,6 +232,45 @@ ggplot(aes(x = v_rbeta), data = as.data.frame(v_rbeta)) +
             colour = "darkgreen", 
             linetype = 2) + 
   theme_bw()
+```
+
+### Relation between number of observations, estimated and real parameters  
+The following graph shows how the value of the estimated parameters based on the method of moments varies based on the number of observation that you have. For this example we again use a beta distribution with shape1 = 2 and shape2 = 5. We draw 20,000 random value of this distribution and for each new draw we re-restimated the parameters of the distribution.  
+```{r}
+v_rbeta2 <- rbeta(20000, shape1 = 2, shape2 = 5) # random beta variable
+
+#m_params <- matrix(NA, nrow = 2,
+ #                  ncol = length(v_rbeta2),
+  #                 dimnames = list(c("shape1", "shape2"),
+   #                                c(1:length(v_rbeta2))))
+
+m_params <- sapply(1:length(v_rbeta2), function (x){ # matrix of estimated parameters
+  
+  mean_beta <- mean(v_rbeta2[c(1:x)])  # calculate mean
+  sd_beta <- sd(v_rbeta2[c(1:x)]) # calculate sd
+  shape1_mom <- ((mean_beta * (1-mean_beta)/sd_beta^2)-1)*mean_beta # calculate first parameter of the distribution
+  shape2_mom <- ((mean_beta * (1-mean_beta)/sd_beta^2)-1)*(1-mean_beta) # calculate second parameter of the distribution
+  
+  return(c(shape1_mom, shape2_mom))
+})
+
+shape1_mean <- cumsum(m_params[1,2:ncol(m_params)])/c(2:ncol(m_params)) # calculate average parameter over number of observation
+shape2_mean <- cumsum(m_params[2,2:ncol(m_params)])/c(2:ncol(m_params)) # calculate average parameter over number of observation
+
+df_params <- cbind(Num_obs = c(1:length(v_rbeta2)),
+                   Shape_1 = c(NA, shape1_mean),
+                   Shape_2 = c(NA, shape2_mean))
+
+plot(log(df_params[, "Num_obs"]), df_params[,"Shape_1"], type = 'l', xlab = 'Number of observations (log scale)', ylab = 'Parameter value', xaxt = "n",
+     ylim = c(1, 8))
+lines(log(df_params[, "Num_obs"]), df_params[,"Shape_2"], col = 'red')
+abline(h = 2, col = 'black', lty = 2)
+abline(h = 5, col = 'red', lty = 2)
+axis(1, at = c(log(50), log(100), log(500), log(2000), log(5000), log(20000)), labels=c(50, 100, 500, 2000, 5000, 20000))
+legend("topright",                    # Add legend to plot
+       legend = c("Shape 1", "Shape 2"),
+       col = c('black', 'red'),
+       lty = 1)
 ```
 
 # Fitting distributions based on percentiles
