@@ -106,13 +106,13 @@ denscomp(list(dist_exp, dist_weib, dist_gamma), legendtext=c("exponential", "Wei
 ```
 
 ### Goodness-of-fit statistics
-## All at once
+#### All at once
 The observation that the Weibull and gamma fit the data better is confirmed by the goodness-of-fit statistics. For instance, the Akaike Information Criterion (the lower, the better) of the gamma distribution is the lowest for the gamma distribution, followed by the Weibull, and finally the exponential.
 ```{r, echo = TRUE}
 gofstat(list(dist_exp, dist_weib, dist_gamma), fitnames = c("exponential", "Weibull", "gamma")) 
 ```
 
-## Specific (e.g. AIC)
+#### Specific (e.g. AIC)
 ```{r, echo = TRUE}
 c('exponenital'= dist_exp$aic, 'Weibull'= dist_weib$aic, 'gamma'= dist_gamma$aic)
 ```
