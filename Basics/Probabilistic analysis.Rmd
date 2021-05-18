@@ -3,6 +3,8 @@ title: "Probabilistic analysis"
 author: "X. Pouwels"
 date: "`r Sys.Date()`"
 output:
+  pdf_document:
+    toc: yes
   html_document:
     toc: yes
     toc_collapsed: yes
@@ -67,7 +69,7 @@ To investigate whether the random values represent adequately the random variabl
 | PA SD |`r round(sd(v_bitobus), 3)`|`r round(sd(v_bustotr), 3)`|`r round(sd(v_delay), 3)`|`r round(sd(v_trainnod), 3)`|`r round(sd(v_trainwd), 3)`|`r round(sd(v_total), 3)`|  
 
 ```{r, echo = TRUE}
-histo <- hist(v_total, breaks = seq(from = 50, to = 90, by = 1), plot = FALSE) # register histogram values
+histo <- hist(v_total, breaks = seq(from = 30, to = 90, by = 1), plot = FALSE) # register histogram values
 
 #create plot with histogram and cumulative probability
 par(mar = c(5, 4, 4, 4) + 0.3) 
