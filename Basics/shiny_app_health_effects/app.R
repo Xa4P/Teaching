@@ -10,14 +10,14 @@ library("rstudioapi")
 
 setwd(dirname(getActiveDocumentContext()$path))
 
-NL_tariff <- read.csv(paste(getwd(), "/EQ5D5L_NLtariff.csv", sep = ""), sep = ";")# load table decrements
+NL_tariff <- read.csv("EQ5D5L_NLtariff.csv", sep = ";")# load table decrements
 
 #install.packages('plotly')
 #library(plotly)
 
 # Load function
-source(paste(getwd(),"/EQ-5D-5L_fct.R", sep= ""))
-source(paste(getwd(),"/function_sf_36.R", sep= ""))
+source("EQ-5D-5L_fct.R")
+source("function_sf_36.R")
 
 # Define UI ----
 ui <- fluidPage(
