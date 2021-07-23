@@ -19,11 +19,11 @@ estimate_utility <- function(mo = 1, sc = 1, ua = 1, pd = 1, ad = 1, tbl_decreme
     
     constant <- tbl_decrements[which(tbl_decrements$Levels == "Constant"), "Decrements"] # Constant when deviating from full health
     utility <- constant + 
-      ifelse(v_levels[1] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == "mo2") + (v_levels[1] - 2), "Decrements"]) +
-      ifelse(v_levels[2] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == "sc2") + (v_levels[2] - 2), "Decrements"]) +
-      ifelse(v_levels[3] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == "ua2") + (v_levels[3] - 2), "Decrements"]) +
-      ifelse(v_levels[4] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == "pd2") + (v_levels[4] - 2), "Decrements"]) +
-      ifelse(v_levels[5] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == "ad2") + (v_levels[5] - 2), "Decrements"]) # apply decrements
+      ifelse(v_levels[1] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("mo", v_levels[1])), "Decrements"]) +
+      ifelse(v_levels[2] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("sc", v_levels[2])), "Decrements"]) +
+      ifelse(v_levels[3] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("ua", v_levels[3])), "Decrements"]) +
+      ifelse(v_levels[4] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("pd", v_levels[4])), "Decrements"]) +
+      ifelse(v_levels[5] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("ad", v_levels[5])), "Decrements"]) # apply decrements
     
     res <- utility
     }
