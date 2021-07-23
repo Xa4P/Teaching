@@ -4,15 +4,20 @@
 
 # Set up
 rm(list= ls())
-NL_tariff <- read.csv(paste(getwd(), "/Basics/EQ5D5L_NLtariff.csv", sep = ""), sep = ";")# load table decrements
 library(shiny)
 library(tidyverse)
+library("rstudioapi") 
+
+setwd(dirname(getActiveDocumentContext()$path))
+
+NL_tariff <- read.csv(paste(getwd(), "/EQ5D5L_NLtariff.csv", sep = ""), sep = ";")# load table decrements
+
 #install.packages('plotly')
 #library(plotly)
 
 # Load function
-source(paste(getwd(),"/Basics/EQ-5D-5L_fct.R", sep= ""))
-source(paste(getwd(),"/Basics/function_sf_36.R", sep= ""))
+source(paste(getwd(),"/EQ-5D-5L_fct.R", sep= ""))
+source(paste(getwd(),"/function_sf_36.R", sep= ""))
 
 # Define UI ----
 ui <- fluidPage(
