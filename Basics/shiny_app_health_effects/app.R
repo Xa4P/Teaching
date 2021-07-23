@@ -8,7 +8,7 @@ library(shiny)
 library(tidyverse)
 library("rstudioapi") 
 
-setwd(dirname(getActiveDocumentContext()$path))
+#setwd(dirname(getActiveDocumentContext()$path))
 
 NL_tariff <- read.csv("EQ5D5L_NLtariff.csv", sep = ";")# load table decrements
 
