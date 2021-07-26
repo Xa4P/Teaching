@@ -1,0 +1,51 @@
+---
+title: "Practical assignment discounting"
+author: "X. Pouwels"
+date: "`r paste(Sys.date())`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Aim
+This assignment aims to introduce you to the concept of discounting in health economic evaluations, using a fictive examples containing 3 interventions.    
+
+# Instuctions
+  
+1. Download the folder `Practical_discounting` from the Canvas page and save it on your computer
+2. Open the `Assingment.R` file  
+3. Load the data for this assignment using the readRDS() function  
+4. When loaded, the object `df_thx` should appear in your environment  
+5. When performing the assignment, please document your code (using R markdown for instance)  
+6. Please keep your answers for the discussion  
+
+# `df_thx` object
+This object contains 7 variables:  
+
+- Year = the year in which incremental costs and effects have been incurred (from Year 0 to 12) 
+- Inc_cost_A = incremental costs of intervention A (in the different years)  
+- Inc_QALY_A = incremental effects (QALYs) of intervention A (in the different years)  
+- Inc_cost_B = incremental costs of intervention B (in the different years)  
+- Inc_QALY_B = incremental effects (QALYs) of intervention B (in the different years)  
+- Inc_cost_C = incremental costs of intervention C (in the different years)  
+- Inc_QALY_C = incremental effects (QALYs) of intervention C (in the different years)  
+Assume that all incremental costs and QALYs of these interventions are calculated against usual care.
+
+\newpage
+# Assignment and questions  
+
+1. Define a new object `r_disc`, which is the discount rate that will be used in the current assignment, and set its value to `0.05` (meaning 5% discount annualy)
+2. Calculate the total undiscounted incremental costs and effects for each intervention  
+3. Calculate the **undiscounted** ICERS for each of these interventions using the total incremental costs and effects you calculated under step 2  
+3.a. Question: what are the total incremental costs and effects for each intervention? Which intervention provides the highest **undiscounted** incremental costs and effects?  
+3.b. Question: what are the ICERs for each intervention? Which intervention provides the best value for money (most favourable ICER) based on these **undiscounted** incremental costs and effects?  
+4. Create a vector of discount weights for Years 0 to 12, using `r_disc`, the `Year` column and the formula: $$w_i = \frac{1} {(1+r)^{t_i}}$$ where $w_i$ is the discount weight in year $i$, $r$ the discount rate, and $t_i$ year $i$.  
+5. Apply discounting on the incremental effects and costs (by multiplying each column by the vector of discount weights fo instance) to convert these to their present value. Report the discounted effects and costs in new columns called Inc_cost_A_d, Inc_QALY_A_d, Inc_cost_B_d, Inc_QALY_B_d, Inc_cost_C_d, Inc_QALY_C_d.   
+6. Calculate the total **discounted** incremental costs and effects, and ICERs for each intervention.  
+6.a. Question: what are the total **discounted** incremental costs and effects for each intervention? Which intervention provides the highest **discounted** incremental costs and effects?  
+6.b. Question: what are the **discounted** ICERs for each intervention? Which intervention provides the best value for money (most favourable ICER) based on these **discounted** incremental costs and effects?  
+6.c. Can you explain the difference between the results obtained under step 6 and steps 2 and 3?  
+7. Now apply a discount rate of **10%**  and calculate the **discounted** incremental costs and effects, and ICERs for each intervention again. Which intervention provides the most and least value for money? Can you explain these results? Are these comparable with results obtained in step 6?  
+8. Can you explain why, even with a small discount rate (for example 0.1%) cost-effectiveness with discounting is always worse than cost-effectiveness without discounting?
