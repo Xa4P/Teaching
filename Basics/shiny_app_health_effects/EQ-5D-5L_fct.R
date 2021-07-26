@@ -11,10 +11,16 @@ estimate_utility <- function(mo = 1, sc = 1, ua = 1, pd = 1, ad = 1, tbl_decreme
   v_levels <- c(mo, sc, ua, pd, ad) # create vector of levels
   v_possible_levels <- c(1:5)
  
-  try(if(all(v_levels %in% v_possible_levels) == FALSE) stop("levels different than 1 to 5"))
+  try(if(all(v_levels %in% v_possible_levels) == FALSE) stop ("levels different than 1 to 5"))
 
-  if(sum(v_levels) == 5) {
-    res <- 1
+  if(v_levels[1] == 1 &
+     v_levels[2] == 1 &
+     v_levels[3] == 1 &
+     v_levels[4] == 1 &
+     v_levels[5] == 1) {
+    
+    res <- tbl_decrements[which(tbl_decrements$Levels == "Constant"), "Decrements"]
+    
   } else{
     
     constant <- tbl_decrements[which(tbl_decrements$Levels == "Constant"), "Decrements"] # Constant when deviating from full health
