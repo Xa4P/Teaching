@@ -1,7 +1,7 @@
 ---
 title: "Practical assignment discounting"
 author: "X. Pouwels"
-date: "`r paste(Sys.date())`"
+date: "`r Sys.Date()`"
 output: pdf_document
 ---
 
@@ -16,10 +16,9 @@ This assignment aims to introduce you to the concept of discounting in health ec
   
 1. Download the folder `Practical_discounting` from the Canvas page and save it on your computer
 2. Open the `Assingment.R` file  
-3. Load the data for this assignment using the readRDS() function  
-4. When loaded, the object `df_thx` should appear in your environment  
-5. When performing the assignment, please document your code (using R markdown for instance)  
-6. Please keep your answers for the discussion  
+3. Load the data for this assignment (`data_discount.rds`) using the readRDS() function, and assign it to an object called `df_thx`   
+4. When performing the assignment, please document your code (using R markdown for instance)  
+5. Please keep your answers for the discussion  
 
 # `df_thx` object
 This object contains 7 variables:  
