@@ -30,7 +30,9 @@ The aim of this practical assignment is to perform a health economic analysis us
 7. For this assignment, you are required to install the following packages: `tidyverse`
 `knitr`, `boot`.
 
-# Required pac
+# Required packages
+
+- ...
 
 # Objects
 ## `df`

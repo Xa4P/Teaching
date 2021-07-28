@@ -179,8 +179,12 @@ ggplot(data = df_thx, aes(x = QALYs, Costs, colour = Treatment)) +
 **Answer:** When the WTP threshold becomes €250,000/QALY or higher.    
 11. Calculate the Net Monetary Benefit (NMB) for each intervention for a WTP threshold of €20,000/QALY. Which intervention has the highest NMB? Does this correspond with your answer to question 6?    
 ```{r, echo = T}
-# Calculate NMB
+# Calculate NMBs
 df_thx$NMB <- 20000 * df_thx$QALYs - df_thx$Costs
 optim_strat <- df_thx[which(df_thx$NMB == max(df_thx$NMB)), "Treatment"]
+
+kable(df_thx[order(df_thx$NMB, decreasing = TRUE), c("Treatment", "Name", "Costs", "QALYs", "NMB")],
+      row.names = F,
+      caption = "Net Monetary Benefits for each intervention, ordered in decreasing order")
 ```
 **Answer:** The optimal intervention using the NMB and a WTP threshold is €20,000/QALY is `r optim_strat`. This answer is similar as the answer to question 6.       
