@@ -22,7 +22,7 @@ df <- data.frame(cbind(
 df$Qol <- ifelse(df$Death == 1, 0, df$Qol)
 
 # Declare inputs of the analysis
-c_Robot <- 3500 
+c_Robot <- 3000 
 c_Open <- 2000 
 c_OK_hour <- 500 
 c_Major_Compl <- 10000 
