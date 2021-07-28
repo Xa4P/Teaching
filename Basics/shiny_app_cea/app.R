@@ -36,7 +36,7 @@ ui <- fluidPage(
                               label = "Number of bootstrap samples",
                               value = 0,
                               min = 0,
-                              max = 10000),
+                              max = 20000),
                  numericInput(inputId = "seed_num",
                               label = "Seed number to use",
                               value = 1,
@@ -49,12 +49,15 @@ ui <- fluidPage(
                  h3("Incremental cost-effectiveness plane"),
                  plotOutput("boot_ice"),
                  tags$hr(),
-                 h3("Mean outcomes and 95% CI"),
+                 h3("Mean outcomes of the bootstrap and 95% CI"),
                  tableOutput("boot_tbl"),
                  tags$hr(),
                  h3("Percentage iterations in each quadrant"),
-                 tableOutput("perc_tbl")
-               )
+                 tableOutput("perc_tbl"),
+                 tags$hr(),
+                 h3("Mean outcomes of the sample"),
+                 tableOutput("det_tbl")
+                 )
              )
     )
     )
@@ -143,7 +146,32 @@ server <- function(input, output) {
     df_perc
  
   }
+)
+  
+data <- eventReactive(input$run_boot,{
+    req(input$file1)
+    read.csv(input$file1$datapath)
+    }
+    )
+  
+output$det_tbl<- renderTable({
+  
+  df_res <- data()
+  
+  # Compute summary statistics - sample
+  res_tbl <- df_res %>%
+    group_by(Procedure) %>%
+    summarise(Mean_Qol = round(mean(Qol), 2),
+              Mean_Total_Cost = round(mean(Total_costs), 2),
+    )
+  res_tbl <- cbind(res_tbl,
+                   Inc_Qol = c("", round(as.numeric(as.character(res_tbl$Mean_Qol[2])) - as.numeric(as.character(res_tbl$Mean_Qol[1])), 2)),
+                   Inc_Cost = c("", round(as.numeric(as.character(res_tbl$Mean_Total_Cost[2])) - as.numeric(as.character(res_tbl$Mean_Total_Cost[1])), 0)),
+                   ICER = c("", round((as.numeric(as.character(res_tbl$Mean_Total_Cost[2])) - as.numeric(as.character(res_tbl$Mean_Total_Cost[1]))) / (as.numeric(as.character(res_tbl$Mean_Qol[2])) - as.numeric(as.character(res_tbl$Mean_Qol[1]))), 0))
   )
+  res_tbl
+  })
+
 }
 
 # Run the app ----

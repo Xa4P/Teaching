@@ -14,8 +14,6 @@ options(scipen = 999) # Disable scientific notations
 library(tidyverse)
 library(knitr)
 library(boot)
-
-load(file = "trial_based_CEA.RData")
 ```
 
 # Aim
@@ -29,6 +27,10 @@ The aim of this practical assignment is to perform a health economic analysis us
 4. When loaded, 8 objects (1 data frame, `df`, and 7 values) should appear in your environment  
 5. When performing the assignment, please document your code (using R markdown for instance)  
 6. Please keep your answers for the discussion  
+7. For this assignment, you are required to install the following packages: `tidyverse`
+`knitr`, `boot`.
+
+# Required pac
 
 # Objects
 ## `df`
@@ -56,76 +58,22 @@ This dataframe contains 9 variables, each row of the dataframe contains the data
 \newpage
 # Assignment and questions  
 1. Calculate the mean operating time, risk of complications, length of stay at ICU and MCU, risk of death, and quality of life after procedure, for both trial arms.  *Hint: use the functions `group_by` and `summarise` from the `tidyverse` package to do so.*  
-
-``` {r, echo = T}
-res_health <- df %>%
-  group_by(Procedure) %>%
-  summarise(mean_OR_time = mean(OR_time),
-            mean_Major_compl = mean(Major_compl),
-            mean_Minor_compl = mean(Minor_compl),
-            mean_Length_icu  = mean(Length_icu),
-            mean_Length_mcu  = mean(Length_mcu),
-            mean_p_death = mean(Death),
-            mean_Qol = mean(Qol))
-
-kable(t(res_health),
-      digits = 2,
-      caption = "Mean health outcome per group")
-```
-
 1.a. Which treatment provides the best health outcomes?  
-The new intervention (robot-assisted surgery) provides better health outcomes because it results in a higher utility than usual care (`r res_health[2, "mean_Qol"]` versus `r res_health[1, "mean_Qol"]`).    
 1.b. Is robot-assisted surgery an improvement upon usual care with respect to all outcomes?  
-No, robot-assisted surgery leads to an increase in the number of minor complications (`r res_health[2, "mean_Minor_compl"]` versus `r res_health[1, "mean_Minor_compl"]`) and jthe length of stay at the medium care unit (`r res_health[2, "mean_Length_mcu"]` versus `r res_health[1, "mean_Length_mcu"]`).   
 2. Create three new variables in `df` called Cost_procedure, Cost_compl, Cost_hosp, which respectively contain the costs related to the procedure (operatime time + procedure), the costs related to complications, and the costs related to hospitalization for each participant. To do so, use the objects beginning with `c_`.   *Hint: Multiply the column of the dataframe `df` by the corresponding objects.*  
-``` {r, echo = T}
-# Calculate total costs for each category per participant
-df$Cost_procedure <- ifelse(df$Procedure == 1, c_Open + df$OR_time / 60 * c_OK_hour, c_Robot + df$OR_time / 60 * c_OK_hour)
-df$Cost_compl     <- df$Major_compl * c_Major_Compl + df$Minor_compl * c_Minor_Compl
-df$Cost_hosp      <- df$Length_icu * c_ICU_day + df$Length_mcu * c_MCU_day
-
-kable(rbind(df[,2:ncol(df)] %>%
-        filter(Procedure == 1) %>%
-        head(5),
-        df[,2:ncol(df)] %>%
-        filter(Procedure == 2) %>%
-        head(5)
-        ), 
-      digits = 2,
-      caption = "First rows of cost per participant")
-```
-
 3. Create a new variable in `df` called Total_costs, which contains the total costs per participant. Calculate the mean costs per group. Based on this information:  
-``` {r, echo = T}
-# Calculate total costs per participant
-df$Total_costs  <- df$Cost_procedure + df$Cost_compl + df$Cost_hosp
-
-res_costs <- df %>%
-  group_by(Procedure) %>%
-  summarise(mean_tot_costs = mean(Total_costs))
-
-kable(res_costs, 
-      digits = 0,
-      caption = "Mean total costs per group")
-```
-
 3.a. Which treatment is cheaper on average, given the observed trial data?  
-**Answer:**
 3.b. What do you think is the probability that the new intervention is cheaper?  
-**Answer:** This question is hard to answer, all we know is that some patients in the intervention arm have lower cost than some patients in the usual care arm. On average the intervention is more expensive so we would guess that this probability is less than 50% but we don’t know yet.  
 3.c. What do you think is the probability that the new intervention leads to health gain?  
-**Answer:** This question is also hard to answer. On average the intervention is leads to a substantially higher utility than usual care, so we would guess that this probability is greater than 50% but we don’t know yet.  
 4. Calculate the difference in mean quality of life and mean total costs between the new intervention and usual care (i.e. the incremental effects and incremental costs). Calculate the ICER using this information. *Hint: use the results you obtained in previous steps*.   
-```{r, echo = T}
-Inc_qol <- res_health[2, "mean_Qol"] - res_health[1, "mean_Qol"]
-Inc_costs <- res_costs[2, "mean_tot_costs"] - res_costs[1, "mean_tot_costs"]
-ICER <- Inc_costs / Inc_qol
-
-c(Inc_qol,Inc_costs, ICER) # show results
+5. Save your dataframe `df` as a .csv file. Ensure that your total effects per participants are in the `Qol` variable and the total costs in the `Total_costs` variable.  
+6. Open the R shiny app using the following command in R and follow the instructions.   
+``` {r, echo = T, eval = FALSE}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 ```
-5. Save your dataframe `df` as a .csv file, and upload it in the R Shiny app to perform bootstrapping.  
-``` {r, echo = T}
-write.csv(df, "df_shiny.csv")
-```
-
-6. Open the R shiny app using the following command in R and follow the instructions.
+7. Run the bootstrap analysis by pushing the "Run bootstrap analysis" in the Shiny app, after having uploaded the file you just created (if this doesn't work, you can use the `df_trial_cea.csv` file that is provided in the map of this assignment. To do so, choose a number of bootstrap samples (at least 1,000 and up to 20,000) and a random seed number (between 1 and infinity). Wait a couple of seconds that the analysis runs. The results will automatically appear on the screen. The results that you see are related to the uncertainty that remains after observing this set of trial data. In addition to the bootstrap results, the mean results of the sample data (that you have calculated earlier), are also provided.    
+7.a. Check the average estimates from the bootstrap samples. Do these results correspond to the point estimates from the observed data?  
+7.b. Check the confidence intervals for the additional health effects and for the additional costs of the intervention. Can you explain why they are so wide?  
+7.c. Check the probabilities of a cost-effectiveness outcome in each one of the four quadrants. How well did you guess the probability that the new intervention is cheaper, or improves health (questions 3b and c)?  
+7.d. No confidence interval is given for the ICER (cell M64) can you explain why such a confidence interval is not informative by looking at the incremental CEA plane in column AA? 
+7.e. Rerun the bootstrap procedure 3 times using different seed numbers. Do the results of the bootstrap analysis change substantially? What would we need to do to reduce this variation in outcomes?  
