@@ -121,7 +121,11 @@ Inc_qol <- res_health[2, "mean_Qol"] - res_health[1, "mean_Qol"]
 Inc_costs <- res_costs[2, "mean_tot_costs"] - res_costs[1, "mean_tot_costs"]
 ICER <- Inc_costs / Inc_qol
 
-write.csv(df, "df_shiny.csv")
+c(Inc_qol,Inc_costs, ICER) # show results
 ```
 5. Save your dataframe `df` as a .csv file, and upload it in the R Shiny app to perform bootstrapping.  
+``` {r, echo = T}
+write.csv(df, "df_shiny.csv")
+```
+
 6. Open the R shiny app using the following command in R and follow the instructions.

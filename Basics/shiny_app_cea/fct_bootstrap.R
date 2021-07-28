@@ -8,6 +8,8 @@ bootstrap_effects_costs <- function(df, num_it = 5000) {
                      )
   )
   
+  progress_bar <- txtProgressBar(min = 0, max = num_it, style = 3)
+  
   for(i in 1:num_it){
     n_pt <- nrow(df[which(df$Procedure == 1),]) # number of patients in each group
     v_id <- sample(x = 1:n_pt, size = n_pt, replace = TRUE)# vector of patient to select to compute
@@ -30,7 +32,13 @@ bootstrap_effects_costs <- function(df, num_it = 5000) {
     
     m_result[i,] <- c(df_res$Effect[1], df_res$Effect[2], df_res$Cost[1], df_res$Cost[2], inc_effect, inc_cost)
     
+    # update progress bar
+    setTxtProgressBar(progress_bar, i)
+    
   }
+  
+  close(progress_bar)
+  
   df_result <- as.data.frame(m_result)
   return(df_result)
   
