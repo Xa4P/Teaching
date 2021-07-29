@@ -59,6 +59,66 @@ ui <- fluidPage(
                  tableOutput("det_tbl")
                  )
              )
+             
+    ),
+    # Assignment 3 - Transition matrix ----
+    tabPanel("Assignment 3 - Transition matrixial-based CEA", fluid = TRUE,
+             sidebarLayout(
+               sidebarPanel(
+                 h3("This part of the assignment illustrates the functioning of the transition matrix"),
+                 h4("Instructions: Fill in the transition probabilities that you have used to define your transition matrix. The transition matrix is automatically completed based on your input. You can thus use it to check your own transition matrix. The assumption in the following calculation is that all persons start in the 'Healthy' health state "),
+                 numericInput(inputId = "p_NewAneurysm",
+                              label = "Probability of new aneurysm",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_AneurysmDetection",
+                              label = "Probability aneurysm is detected",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_TreatmentIsFatal",
+                              label = "Probability aneurysm's treatment is fatal",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_DeathOther",
+                              label = "Probability of death from other causes",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 tags$hr(),
+                 h4("Instructions: To obtain the health state distribution after N cycle, fill in a number of cycle (0-100)"),
+                 numericInput(inputId = "n_cycle",
+                              label = "Health state distribution after:",
+                              value = 2,
+                              min = 2,
+                              max = 100),
+               ),
+               mainPanel(
+                 h3("Transition matrix after 1 cycle"),
+                 tableOutput("m_tp_1"),
+                 h3("Health state distribution after 1 cycle"),
+                 tableOutput("t_dist_1"),
+                 tags$hr(),
+                 h3("Transition matrix after 2 cycle"),
+                 tableOutput("m_tp_2"),
+                 h3("Health state distribution after 2 cycle"),
+                 tableOutput("t_dist_2"),
+                 tags$hr(),
+                 h3("Transition matrix after 3 cycle"),
+                 tableOutput("m_tp_3"),
+                 h3("Health state distribution after 3 cycle"),
+                 tableOutput("t_dist_3"),
+                 tags$hr(),
+                 h3("Transition matrix after N cycle"),
+                 tableOutput("m_tp_n"),
+                 h3("Health state distribution after N cycle"),
+                 tableOutput("t_dist_n"),
+                 tags$hr()
+               )
+             )
+             
     )
     )
   )
@@ -171,6 +231,69 @@ output$det_tbl<- renderTable({
   )
   res_tbl
   })
+
+## Assignment 3 ----
+
+mat_tp <- function() {
+  v_names_hs <- c("Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment")
+  m_tp <- matrix(0, 
+               ncol = 5,
+               nrow = 5,
+               dimnames = list(v_names_hs,
+                               v_names_hs))
+
+  m_tp["Healthy", "Healthy"]     <- 1- input$p_NewAneurysm - input$p_DeathOther # Example
+  m_tp["Healthy", "DeathOther"]  <- input$p_DeathOther
+  m_tp["Healthy", "NewAneurysm"] <- input$p_NewAneurysm
+  m_tp["NewAneurysm", "DetectedAneurysm"] <- input$p_AneurysmDetection
+  m_tp["NewAneurysm", "DeathOther"] <- input$p_DeathOther
+  m_tp["NewAneurysm", "NewAneurysm"] <- 1 - input$p_AneurysmDetection - input$p_DeathOther
+  m_tp["DetectedAneurysm", "Healthy"] <- 1 - input$p_TreatmentIsFatal
+  m_tp["DetectedAneurysm", "DeathOther"] <- input$p_TreatmentIsFatal
+  m_tp["DeathOther", "DeathOther"] <- 1
+  m_tp["DeathTreatment", "DeathTreatment"] <- 1
+
+  return(m_tp)
+  }
+
+output$m_tp_1 <- renderTable({
+  cbind(` `=colnames(mat_tp()), mat_tp())
+  
+})
+
+output$t_dist_1 <- renderTable({
+  c(1,0,0,0,0) %*% mat_tp() 
+})
+
+output$m_tp_2 <- renderTable({
+  m_tp_2 <- mat_tp() %*% mat_tp() 
+  
+  cbind(` `=colnames(mat_tp()), m_tp_2)
+})
+
+output$t_dist_2 <- renderTable({
+  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp())
+})
+
+output$m_tp_3 <- renderTable({
+  m_tp_3 <- (mat_tp() %*% mat_tp() %*% mat_tp()) 
+  
+  cbind(` `=colnames(mat_tp()), m_tp_3)
+})
+
+output$t_dist_3 <- renderTable({
+  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp() %*% mat_tp())
+})
+
+output$m_tp_n <- renderTable({
+  m_tp_3 <- (mat_tp() %*% mat_tp() %*% mat_tp()) 
+  
+  cbind(` `=colnames(mat_tp()), m_tp_3)
+})
+
+output$t_dist_n <- renderTable({
+  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp() %*% mat_tp())
+})
 
 }
 

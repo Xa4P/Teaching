@@ -6,14 +6,12 @@
 rm(list= ls())
 library(shiny)
 library(tidyverse)
-library("rstudioapi") 
+library(diagram)
+library(rstudioapi) 
 
 #setwd(dirname(getActiveDocumentContext()$path))
 
 NL_tariff <- read.csv("EQ5D5L_NLtariff.csv", sep = ";")# load table decrements
-
-#install.packages('plotly')
-#library(plotly)
 
 # Load function
 source("EQ-5D-5L_fct.R")
