@@ -62,11 +62,12 @@ ui <- fluidPage(
              
     ),
     # Assignment 3 - Transition matrix ----
-    tabPanel("Assignment 3 - Transition matrixial-based CEA", fluid = TRUE,
+    tabPanel("Assignment 3 - Transition matrix", fluid = TRUE,
              sidebarLayout(
                sidebarPanel(
                  h3("This part of the assignment illustrates the functioning of the transition matrix"),
-                 h4("Instructions: Fill in the transition probabilities that you have used to define your transition matrix. The transition matrix is automatically completed based on your input. You can thus use it to check your own transition matrix. The assumption in the following calculation is that all persons start in the 'Healthy' health state "),
+                 h4("Instructions: Fill in the transition probabilities that you have used to define your transition matrix. The transition matrix is automatically completed based on your input. You can thus use it to check your own transition matrix. For these calculations, we assume that all persons start in the 'Healthy' health state."),
+                 h4("The transition matrices to calculate the health state distribution after 2, 3, or N cycles is obtained by multiplying the transition matrix by itself 2, 3, and N times respectively. The health state distribution after 2, 3, and N cycles is obtained by multiplying these transition matrices by the start position."),
                  numericInput(inputId = "p_NewAneurysm",
                               label = "Probability of new aneurysm",
                               value = 0,
@@ -94,6 +95,8 @@ ui <- fluidPage(
                               value = 2,
                               min = 2,
                               max = 100),
+                 actionButton(inputId = "calc_m_tp_n",
+                              label = "Calculate matrix with after N number of cycles"),
                ),
                mainPanel(
                  h3("Transition matrix after 1 cycle"),
@@ -101,20 +104,21 @@ ui <- fluidPage(
                  h3("Health state distribution after 1 cycle"),
                  tableOutput("t_dist_1"),
                  tags$hr(),
-                 h3("Transition matrix after 2 cycle"),
+                 h3("Transition matrix after 2 cycles"),
                  tableOutput("m_tp_2"),
-                 h3("Health state distribution after 2 cycle"),
+                 h3("Health state distribution after 2 cycles"),
                  tableOutput("t_dist_2"),
                  tags$hr(),
-                 h3("Transition matrix after 3 cycle"),
+                 h3("Transition matrix after 3 cycles"),
                  tableOutput("m_tp_3"),
-                 h3("Health state distribution after 3 cycle"),
+                 h3("Health state distribution after 3 cycles"),
                  tableOutput("t_dist_3"),
                  tags$hr(),
-                 h3("Transition matrix after N cycle"),
+                 h3(textOutput("txt_m_tp_n")),
                  tableOutput("m_tp_n"),
-                 h3("Health state distribution after N cycle"),
+                 h3(textOutput("txt_dist_tp_n")),
                  tableOutput("t_dist_n"),
+                 
                  tags$hr()
                )
              )
@@ -285,15 +289,36 @@ output$t_dist_3 <- renderTable({
   c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp() %*% mat_tp())
 })
 
-output$m_tp_n <- renderTable({
-  m_tp_3 <- (mat_tp() %*% mat_tp() %*% mat_tp()) 
+mat_tp_n <- eventReactive(input$calc_m_tp_n, {
+  for (i in 2:input$n_cycle) {
+    if(i == 2) {
+      m_tp_n <- mat_tp() %*% mat_tp()
+    } else {
+      m_tp_n <- m_tp_n %*% mat_tp()
+    }
+  }
   
-  cbind(` `=colnames(mat_tp()), m_tp_3)
+  return(m_tp_n)
+}
+                          
+)
+
+output$m_tp_n <- renderTable({
+  cbind(` `= colnames(mat_tp()), round(mat_tp_n(),3))
 })
 
 output$t_dist_n <- renderTable({
-  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp() %*% mat_tp())
+  c(1,0,0,0,0) %*% (round(mat_tp_n(), 3))
 })
+
+output$txt_m_tp_n <- renderText({
+  paste("Transition matrix after", input$n_cycle ,"cycles", sep = " ")
+})
+
+output$txt_dist_tp_n <- renderText({
+  paste("Health state distribution after", input$n_cycle ,"cycles", sep = " ")
+})
+
 
 }
 
