@@ -1,0 +1,176 @@
+---
+title: "Practical Health State Transition Model - Solutions"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo = TRUE}
+rm(list  = ls()) # clear environment
+options(scipen = 999) # Disable scientific notations
+library(tidyverse)
+library(knitr)
+```
+
+# Aim
+The aim of this practical assignment is to get you acquainted with the principle of health state transition models (HSTM). To do so, you will define a transition matrix for a simple HSTM and explore how you can use it to define your HSTM. The example used in the practical focuses on evaluating the life course of patients at risk of developing intracranial aneurysms using a HSTM.  
+
+# Instuctions
+  
+1. Download the folder `Practical_HSTM_1` from the Canvas page and save it on your computer  
+2. Before performing the assignment, have a look at how the model structure looks like on the next page  
+2. Open the `Assignment.R` file and follow the steps in the R file      
+3. Once you have completed the assignment, answer the questions at the end of this document    
+
+\newpage
+# Model structure
+This section provides an explaination of the health state transition model (HSTM) used in this practical assignment. The HSTM represents the disease progression and treatment of patients who may develop an aneurysm. All patients start in the "Healthy" health state. From there, they can die from other causes of disease than an aneurysm, or they can develop a new intracranial aneurysm.  If they develop an aneurysm, the aneurysm can be detected, or they can die. If the aneurism is detected, it is assumed that patients receive treatment. The treatment can either be succesful and the patients return to "Healthy", or the treatment can be fatal and patients die. When patients die (from any causes), they remain in that health state (this is an absorbing health state).  
+In this model, patients move as an homogeneous cohort, all individuals start in the "Healthy" health state, the time cycle in this model is 1 month, and costs and health effects are not  included in this simple model.  
+  
+```{r, fig.align = 'center', out.width = "90%", fig.cap = "Health state transition model structure", echo = F}
+knitr::include_graphics("Fig_model_structure.png")
+```
+
+\newpage
+# Questions and answers
+
+1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j).  
+
+```{r, echo = T}
+# Define probabilities
+p_NewAneurysm = 	0.10 # Probability that an individual develops a new intracranial aneurysm 
+p_AneurysmDetection = 	0.50 # Probability that a newly developed aneurysm is detected
+p_TreatmentIsFatal = 	0.20 # Probability that treatment of a detected aneurysm induces a fatal complication
+p_DeathOther = 	0.10 # Probability of death due to causes unrelated to aneurysms
+```
+1.a. The probability than an individual dies from aneurysm treatment in month 2  
+```{r, echo = T}
+0 
+```
+**Explanation:** It is not possible to reach the DeathTreatment state in 2 cycles
+
+1.b. The probability that an individual starts in the Healthy state and remains there, that is, survives and does not develop an aneurysm, in 1 year  
+```{r, echo = T}
+(1 - p_NewAneurysm - p_DeathOther)^12
+```
+**Explanation:** Survival without new aneurysm has probability 0.8 per cycle  
+
+1.c. The probability that an individual develops 2 aneurysms and is treated successfully twice, in 6 months’ time  
+```{r, echo = T}
+(p_NewAneurysm * p_AneurysmDetection * (1 - p_TreatmentIsFatal)) ^ 2
+# OR: (p_NewAneurysm * p_AneurysmDetection * (1 - p_TreatmentIsFatal)) * (p_NewAneurysm * p_AneurysmDetection * (1 - p_TreatmentIsFatal))
+```
+**Explanation:** probability of new anerism x probability it is detected * probability it is sucessfully treated. This has to be exponentiated by because this process should occur twice.  
+
+1.d. The probability that an individual dies of other causes within the first month  
+```{r, echo = T}
+p_DeathOther
+```
+**Explanantion:** Just the probability of dying immediately in cycle 1
+
+1.e. The probability that an individual dies of other causes within the first 2 months  
+```{r, echo = T}
+p_DeathOther + (1 - p_DeathOther - p_NewAneurysm) * p_DeathOther + p_NewAneurysm * p_DeathOther
+```
+**Explanation:** Death from Healthy in cycle 1 or 2 plus death from NewAneurysm in cycle 2  
+
+1.f. The probability that an individual with a new and untreated aneurysm (that remains untreated) develops an additional, new aneurysm, in 2 years’ time  
+```{r, echo = T}
+0 
+```
+**Explanantion:** In this model it is not possible to have more than 1 untreated aneurysm  
+
+1.g. The excess mortality risk (expressed as relative risk) of individuals with successfully treated aneurysms compared to healthy individuals  
+```{r, echo = T}
+1
+```
+**Explanation:** Given survival of treatment all treated individuals will return to the Healthy state in the cycle following treatment. This Markov model has no 'memory': all individuals in a health state are similar, regardless of their history  
+
+1.h. The risk of death from a car accident for an individual with a detected unruptured aneurysm  
+```{r, echo = T}
+0
+```
+**Explanation:** Due to the severity of aneurysm treatment death from other causes is ignored in the cycle patients are treated  
+
+1.i. [OPTIONAL] The sensitivity of the (unknown) test used to detect aneurysms after 4 months/repetitions  
+```{r, echo = T}
+p_AneurysmDetection + p_AneurysmDetection * (1 - p_AneurysmDetection - p_DeathOther) +
+  p_AneurysmDetection * (1 - p_AneurysmDetection - p_DeathOther) ^ 2 +
+  p_AneurysmDetection * (1 - p_AneurysmDetection - p_DeathOther) ^ 3
+```
+**Explanation:** Every cycle there is 50% of detection in individuals still alive and without previous detection. Hence, for each cycle, the probability of staying in the 'Detected intracranial aneurysm health state is calculated (1 - p_AneurysmDetection - p_DeathOther) and is multiplied by the probability of detecting the aneurysm (0.5)  
+
+1.j. [OPTIONAL] The probability that an individual with a new aneurysm dies before it is detected (you can give an approximation, or the exact value)  
+```{r, echo = T}
+sum((p_DeathOther) * (1 - p_DeathOther - p_AneurysmDetection) ^ c(0:1)) # 2 cycles
+sum((p_DeathOther) * (1 - p_DeathOther - p_AneurysmDetection) ^ c(0:2)) # 3 cycles
+sum((p_DeathOther) * (1 - p_DeathOther - p_AneurysmDetection) ^ c(0:3)) # 4 cycles
+
+sum((p_DeathOther) * (1 - p_DeathOther - p_AneurysmDetection) ^ c(0:1000)) # limit, the number 1000 can be increased if needed
+plot(y = cumsum((p_DeathOther) * (1 - p_DeathOther - p_AneurysmDetection) ^ c(0:1000)), 
+     x = log(c(0:1000)),
+     type = "l",
+     main = "Convergence probability to die before the aneurysm is detected",
+     xlab = "Number of cycles (log scale)",
+     xaxt = "n",
+     ylab = "Probability") # graphic of the solution (x on the log scale)
+axis(1, at = c(log(1), log(10), log(20), log(50), log(100), log(500), log(1000)), 
+     labels =c(1, 10, 20, 50, 100, 500, 1000)
+     )
+
+```
+**Explanation:** The approximation for 2,3,4 cycles is 0.140, 0.156, 0.162 respectively, the true value (limit) equals 1/6 = 0.166. See http://www.mathsisfun.com/algebra/sequences-sums-geometric.html for a more extensive explanation. Here we have a=1/10 and r=2/5 so the sum of our geometric series converges to a\*(1/(1-r)) = 1/10\*(1/(1-2/5)) = 1/6  
+
+
+2.a.	To evaluate the life course of individuals over a large number of time cycles we need a transition matrix. Create a transition matrix (called `m_tp`) containing 5 rows and 5 columns (using the matrix() function). Assign the value 0 to all cells of the matrix to start with. Name the rows and column (argument dimnames of the function): "Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment".  
+
+```{r, echo = T}
+v_names_hs <- c("Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment")
+m_tp <- matrix(0, 
+               ncol = 5,
+               nrow = 5,
+               dimnames = list(v_names_hs,
+                               v_names_hs))
+kable(m_tp, row.names = T) # show
+```
+
+2.b. Fill the matrix with the values of the transition probabilities. The rows indicate the health state from which persons transit. The columns indicate the health state to which persons transit. You can use the names of the rows and columns to assign the transition probabilities to each cell. Do not forget to define the probability of remaining in a health state!  
+
+```{r, echo = T}
+m_tp["Healthy", "Healthy"]     <- 1- p_NewAneurysm - p_DeathOther # Example
+m_tp["Healthy", "DeathOther"]  <- p_DeathOther
+m_tp["Healthy", "NewAneurysm"] <- p_NewAneurysm
+m_tp["NewAneurysm", "DetectedAneurysm"] <- p_AneurysmDetection
+m_tp["NewAneurysm", "DeathOther"] <- p_DeathOther
+m_tp["NewAneurysm", "NewAneurysm"] <- 1 - p_AneurysmDetection - p_DeathOther
+m_tp["DetectedAneurysm", "Healthy"] <- 1 - p_TreatmentIsFatal
+m_tp["DetectedAneurysm", "DeathOther"] <- p_TreatmentIsFatal
+m_tp["DeathOther", "DeathOther"] <- 1
+m_tp["DeathTreatment", "DeathTreatment"] <- 1
+```
+
+2.c. Check whether all rows sum up to one (using the rowSums() function for instance).  
+```{r, echo = T}
+rowSums(m_tp) == 1 # all true!
+```
+
+3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment.R` in the left panel. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
+```{r, echo = T, eval = F}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
+```
+3.a. What is the probability that an individual is healthy after exactly 1 year?  
+**Answer:** 19.5% (0.195)   
+3.b.)	Compare the answer of 1.b. with your answer to 3.a. why is the latter probability larger?  
+**Answer:** The 0.195 from question 3.a. also includes all individuals who develop an aneurysm which is then succesfully treated, while this is not taken into account in 1.b.  
+3.c.	How many months does it take until 60% of all individuals have died?  
+**Answer:** 8 cycles. For N = 8 we find approximately 53.2% of individuals have died from other causes and 6% from treatment, which makes a total of ~ 60%  
+3.d. What percentage of all individuals is still alive after 2 years?  
+**Answer:** 4.9% in the "Healthy" health state, 1% in the "New Aneurysm" health state, and 0.6% in the "Detected Aneurysm" health state, which is a total of 6.5%.  
+3.e.	How much more likely are individuals to die from other causes than from aneurysm treatment? Hint: this only becomes apparent when all individuals have died.  
+**Answer:** After any number of cycles > 65, everybody has died and we can answer this question: 87.5% of individuals have died from other causes, and 12.5% have died from treatment. This results in a relative risk of 0.875/0.125 = 7.  
+3.f.	Change the starting distribution of the model (using the input fields) to reflect 50% individuals starting in the "New Aneurysm" state and 50% starting in the "Detected Aneurysm" state. How does this change the probability of an individual being healthy after exactly 1 year? Compare your answer to the answer for 3.a.  
+**Answer:** The probability of being health after a year is now 17.7%, which is lower than the 19.5% of answer 3.a. This is a reduction of 1.8% in absolute term, and a decrease of 9.2% in relative terms.  
+

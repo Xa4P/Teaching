@@ -95,8 +95,35 @@ ui <- fluidPage(
                               value = 2,
                               min = 2,
                               max = 100),
-                 actionButton(inputId = "calc_m_tp_n",
-                              label = "Calculate matrix with after N number of cycles"),
+                 tags$hr(),
+                 h4("Health state distribution at start"),
+                 numericInput(inputId = "n_Healthy",
+                              label = "Proportion of individuals starting in health state: 'Healthy'",
+                              value = 1,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "n_NewAneurysm",
+                              label = "Proportion of individuals starting in health state: 'New aneurysm'",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "n_AneurysmDetection",
+                              label = "Proportion of individuals starting in health state: 'Aneurysm detected'",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 
+                 numericInput(inputId = "n_DeathOther",
+                              label = "Proportion of individuals starting in health state: 'Dead from other causes'",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "n_DeathTreatment",
+                              label = "Proportion of individuals starting in health state: 'Dead from treatment'",
+                              value = 0,
+                              min = 0,
+                              max = 1)
+                 
                ),
                mainPanel(
                  h3("Transition matrix after 1 cycle"),
@@ -118,7 +145,6 @@ ui <- fluidPage(
                  tableOutput("m_tp_n"),
                  h3(textOutput("txt_dist_tp_n")),
                  tableOutput("t_dist_n"),
-                 
                  tags$hr()
                )
              )
@@ -253,12 +279,18 @@ mat_tp <- function() {
   m_tp["NewAneurysm", "DeathOther"] <- input$p_DeathOther
   m_tp["NewAneurysm", "NewAneurysm"] <- 1 - input$p_AneurysmDetection - input$p_DeathOther
   m_tp["DetectedAneurysm", "Healthy"] <- 1 - input$p_TreatmentIsFatal
-  m_tp["DetectedAneurysm", "DeathOther"] <- input$p_TreatmentIsFatal
+  m_tp["DetectedAneurysm", "DeathTreatment"] <- input$p_TreatmentIsFatal
   m_tp["DeathOther", "DeathOther"] <- 1
   m_tp["DeathTreatment", "DeathTreatment"] <- 1
 
   return(m_tp)
   }
+
+v_start <- function() {c(input$n_Healthy,
+                         input$n_NewAneurysm,
+                         input$n_AneurysmDetection,
+                         input$n_DeathOther,
+                         input$n_DeathTreatment)}
 
 output$m_tp_1 <- renderTable({
   cbind(` `=colnames(mat_tp()), mat_tp())
@@ -266,7 +298,7 @@ output$m_tp_1 <- renderTable({
 })
 
 output$t_dist_1 <- renderTable({
-  c(1,0,0,0,0) %*% mat_tp() 
+  v_start() %*% mat_tp() 
 })
 
 output$m_tp_2 <- renderTable({
@@ -276,7 +308,7 @@ output$m_tp_2 <- renderTable({
 })
 
 output$t_dist_2 <- renderTable({
-  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp())
+  v_start() %*% (mat_tp() %*% mat_tp())
 })
 
 output$m_tp_3 <- renderTable({
@@ -286,10 +318,19 @@ output$m_tp_3 <- renderTable({
 })
 
 output$t_dist_3 <- renderTable({
-  c(1,0,0,0,0) %*% (mat_tp() %*% mat_tp() %*% mat_tp())
+  v_start() %*% (mat_tp() %*% mat_tp() %*% mat_tp())
 })
 
-mat_tp_n <- eventReactive(input$calc_m_tp_n, {
+#mat_tp_n <- eventReactive(input$calc_m_tp_n, {
+  
+  
+ # return(m_tp_n)
+#}
+                          
+#)
+
+output$m_tp_n <- renderTable({
+  
   for (i in 2:input$n_cycle) {
     if(i == 2) {
       m_tp_n <- mat_tp() %*% mat_tp()
@@ -298,20 +339,25 @@ mat_tp_n <- eventReactive(input$calc_m_tp_n, {
     }
   }
   
-  return(m_tp_n)
-}
-                          
-)
-
-output$m_tp_n <- renderTable({
-  cbind(` `= colnames(mat_tp()), round(mat_tp_n(),3))
+  cbind(` `= colnames(mat_tp()), round(m_tp_n,3))
 })
 
 output$t_dist_n <- renderTable({
-  c(1,0,0,0,0) %*% (round(mat_tp_n(), 3))
-})
+  
+  for (i in 2:input$n_cycle) {
+    if(i == 2) {
+      m_tp_n <- mat_tp() %*% mat_tp()
+    } else {
+      m_tp_n <- m_tp_n %*% mat_tp()
+    }
+  }
+  
+  v_start() %*% m_tp_n
+}, digits = 3)
 
 output$txt_m_tp_n <- renderText({
+  
+  
   paste("Transition matrix after", input$n_cycle ,"cycles", sep = " ")
 })
 

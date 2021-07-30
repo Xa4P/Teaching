@@ -20,7 +20,7 @@ p_DeathOther = 	0.10 # Probability of death due to causes unrelated to aneurysms
 #### Step 2: Answer the questions ####
 #------------------------------------#
 
-#2. Use the model parameters defined in the box below the model and the model representation to calculate the following probabilities/quantities in the yellow cells in column L.
+#1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j). 
 ##a. The probability than an individual dies from aneurysm treatment in month 2
 0 
 ## Explanation: It is not possible to reach the DeathTreatment state in 2 cycles
@@ -95,7 +95,7 @@ m_tp <- matrix(0,
 # Fill the matrix with the values of the transition probabilities
 # The rows indicate the health state from which persons transit
 # The columns indicate the health state to which persons transit
-## You can use the names of the rows and columns to assign a value to their
+## You can use the names of the rows and columns to assign the transition probabilities to each cell.
 ## Do not forget to define the probability of remaining in a health state!
 m_tp["Healthy", "Healthy"]     <- 1- p_NewAneurysm - p_DeathOther # Example
 m_tp["Healthy", "DeathOther"]  <- p_DeathOther
@@ -104,7 +104,7 @@ m_tp["NewAneurysm", "DetectedAneurysm"] <- p_AneurysmDetection
 m_tp["NewAneurysm", "DeathOther"] <- p_DeathOther
 m_tp["NewAneurysm", "NewAneurysm"] <- 1 - p_AneurysmDetection - p_DeathOther
 m_tp["DetectedAneurysm", "Healthy"] <- 1 - p_TreatmentIsFatal
-m_tp["DetectedAneurysm", "DeathOther"] <- p_TreatmentIsFatal
+m_tp["DetectedAneurysm", "DeathTreatment"] <- p_TreatmentIsFatal
 m_tp["DeathOther", "DeathOther"] <- 1
 m_tp["DeathTreatment", "DeathTreatment"] <- 1
 
@@ -112,6 +112,3 @@ m_tp["DeathTreatment", "DeathTreatment"] <- 1
 ## Using the rowSums() function
 rowSums(m_tp) == 1 # all true!
 
-c(1,0,0,0,0) %*% m_tp
-
-c(1,0,0,0,0) %*% (m_tp %*% m_tp)
