@@ -157,7 +157,7 @@ m_tp["DeathTreatment", "DeathTreatment"] <- 1
 rowSums(m_tp) == 1 # all true!
 ```
 
-3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment.R` in the left panel. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
+3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment.R` in the left panel. Check whether you correctly filled the transition matrix manually. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
 ```{r, echo = T, eval = F}
 runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 ```
@@ -174,3 +174,7 @@ runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 3.f.	Change the starting distribution of the model (using the input fields) to reflect 50% individuals starting in the "New Aneurysm" state and 50% starting in the "Detected Aneurysm" state. How does this change the probability of an individual being healthy after exactly 1 year? Compare your answer to the answer for 3.a.  
 **Answer:** The probability of being health after a year is now 17.7%, which is lower than the 19.5% of answer 3.a. This is a reduction of 1.8% in absolute term, and a decrease of 9.2% in relative terms.  
 
+3.g. Why doesn’t the distribution of individuals over the health states change when you apply a time horizon of 7 years instead of 6 years?  
+**Answer:** 7 years means N = 12\*7 = 84, and 6 years means N = 12\*6 = 72. From testing different values of N we find that the distribution of individuals over the 5 health states does not change anymore (at least in 3 decimals) for N > 65. Indeed, for any time horizon longer than 65 months we will find the same results as all individuals will die within 65 months time.  
+
+4. Re-open your `Assignment.R` file
