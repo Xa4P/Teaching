@@ -111,17 +111,6 @@ ui <- fluidPage(
                               label = "Proportion of individuals starting in health state: 'Aneurysm detected'",
                               value = 0,
                               min = 0,
-                              max = 1),
-                 
-                 numericInput(inputId = "n_DeathOther",
-                              label = "Proportion of individuals starting in health state: 'Dead from other causes'",
-                              value = 0,
-                              min = 0,
-                              max = 1),
-                 numericInput(inputId = "n_DeathTreatment",
-                              label = "Proportion of individuals starting in health state: 'Dead from treatment'",
-                              value = 0,
-                              min = 0,
                               max = 1)
                  
                ),
@@ -145,6 +134,67 @@ ui <- fluidPage(
                  tableOutput("m_tp_n"),
                  h3(textOutput("txt_dist_tp_n")),
                  tableOutput("t_dist_n"),
+                 tags$hr()
+               )
+             )
+             
+    ),
+    # Assignment 3 - Cohort simulation ----
+    tabPanel("Assignment 3 - Cohort simulation", fluid = TRUE,
+             sidebarLayout(
+               sidebarPanel(
+                 h3("This part of the assignment illustrates the functioning of the cohort simulation"),
+                 h4("Instructions: Fill in the transition probabilities that you have used to define your transition matrix. The transition matrix is automatically completed based on your input. You can thus use it to check your own transition matrix. For these calculations, we assume that all persons start in the 'Healthy' health state."),
+                 h4("You can use the following application to answer the questions 4.f. and 4.g. (or to check your answers)"),
+                 h4("The left panel shows a plot of the health state membership during each cycle, the cohort simulation, and the cumulative number of months accrued in the 'Alive' health states during the cohort simulation"),
+                 h4("Transition probabilities"),
+                 numericInput(inputId = "p_NewAneurysm_2",
+                              label = "Probability of new aneurysm",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_AneurysmDetection_2",
+                              label = "Probability aneurysm is detected",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_TreatmentIsFatal_2",
+                              label = "Probability aneurysm's treatment is fatal",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "p_DeathOther_2",
+                              label = "Probability of death from other causes",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 tags$hr(),
+                 h4("Health state distribution at start"),
+                 numericInput(inputId = "n_Healthy_2",
+                              label = "Proportion of individuals starting in health state: 'Healthy'",
+                              value = 1,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "n_NewAneurysm_2",
+                              label = "Proportion of individuals starting in health state: 'New aneurysm'",
+                              value = 0,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "n_AneurysmDetection_2",
+                              label = "Proportion of individuals starting in health state: 'Aneurysm detected'",
+                              value = 0,
+                              min = 0,
+                              max = 1)
+                 
+               ),
+               mainPanel(
+                 h3("Plot cohort simulation"),
+                 plotOutput("plot_cohort"),
+                 h3("Cohort simulation"),
+                 tableOutput("tbl_cohort"),
+                 tags$hr(),
+                 h3("Cumulative number of person-months over the 3 years"),
+                 tableOutput("tbl_cum"),
                  tags$hr()
                )
              )
@@ -262,7 +312,7 @@ output$det_tbl<- renderTable({
   res_tbl
   })
 
-## Assignment 3 ----
+## Assignment 3 - Transition matrix ----
 
 mat_tp <- function() {
   v_names_hs <- c("Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment")
@@ -289,8 +339,8 @@ mat_tp <- function() {
 v_start <- function() {c(input$n_Healthy,
                          input$n_NewAneurysm,
                          input$n_AneurysmDetection,
-                         input$n_DeathOther,
-                         input$n_DeathTreatment)}
+                         0,
+                         0)}
 
 output$m_tp_1 <- renderTable({
   cbind(` `=colnames(mat_tp()), mat_tp())
@@ -320,14 +370,6 @@ output$m_tp_3 <- renderTable({
 output$t_dist_3 <- renderTable({
   v_start() %*% (mat_tp() %*% mat_tp() %*% mat_tp())
 })
-
-#mat_tp_n <- eventReactive(input$calc_m_tp_n, {
-  
-  
- # return(m_tp_n)
-#}
-                          
-#)
 
 output$m_tp_n <- renderTable({
   
@@ -364,6 +406,120 @@ output$txt_m_tp_n <- renderText({
 output$txt_dist_tp_n <- renderText({
   paste("Health state distribution after", input$n_cycle ,"cycles", sep = " ")
 })
+
+
+## Assignment 3 - Cohort simulation ----
+
+m_hs_fct <- function() {
+  v_names_hs <- c("Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment")
+  m_tp <- matrix(0, 
+                 ncol = 5,
+                 nrow = 5,
+                 dimnames = list(v_names_hs,
+                                 v_names_hs))
+  
+  m_tp["Healthy", "Healthy"]     <- 1- input$p_NewAneurysm_2 - input$p_DeathOther_2 # Example
+  m_tp["Healthy", "DeathOther"]  <- input$p_DeathOther_2
+  m_tp["Healthy", "NewAneurysm"] <- input$p_NewAneurysm_2
+  m_tp["NewAneurysm", "DetectedAneurysm"] <- input$p_AneurysmDetection_2
+  m_tp["NewAneurysm", "DeathOther"] <- input$p_DeathOther_2
+  m_tp["NewAneurysm", "NewAneurysm"] <- 1 - input$p_AneurysmDetection_2 - input$p_DeathOther_2
+  m_tp["DetectedAneurysm", "Healthy"] <- 1 - input$p_TreatmentIsFatal_2
+  m_tp["DetectedAneurysm", "DeathTreatment"] <- input$p_TreatmentIsFatal_2
+  m_tp["DeathOther", "DeathOther"] <- 1
+  m_tp["DeathTreatment", "DeathTreatment"] <- 1
+  
+  
+  v_start <- c(input$n_Healthy_2 * 10000,
+                             input$n_NewAneurysm_2 * 10000,
+                             input$n_AneurysmDetection_2 * 10000,
+                             0,
+                             0)
+  
+  n_cycles <- 36 # the number of cycles to simulate, assume 3 years
+  n_pt <- 10000  # the size of the cohort, assume 10000 persons
+  m_hs <- matrix(0, 
+                 nrow = n_cycles + 1,
+                 ncol = length(v_names_hs),
+                 dimnames = list(c(0:n_cycles),
+                                 v_names_hs)) # a cohort state matrix, containing [n_cycles + 1] rows (because the first row is the start position), and as much column as the number of health states.
+  ## fill this matrix with 0's for now
+  
+  ## We then need to define the starting positions of the cohort
+  ## Assign all individuals to the "Healthy" health state in the first row of the `m_hs` matrix
+  m_hs[1, ] <- v_start
+  
+  ## Perform the matrix multiplication to determine the state membership over the cycles.
+  ## To determine the number of individuals in each health state during each cycle, one need to multiply the vector of state membership in the previous cycle by the transition matrix
+  ## Example: to calculate the number of individuals in each state in cycle 1, multiply the state membership in cycle 0 by the transition matrix
+  ## HINT: to do so, use a a for loop over rows 2 to 41 of the `m_hs` matrix
+  
+  for(cycle in 1:n_cycles){
+    
+    # For your matrix of health state
+    m_hs[cycle + 1, ] <- m_hs[cycle, ] %*% m_tp # matrix multiplication
+    
+  }
+  
+  
+  return(m_hs)
+}
+
+
+output$plot_cohort<- renderPlot({
+  
+  n_pt <- 10000
+  v_names_hs <- c("Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment")
+  m_hs <- m_hs_fct()
+  
+  plot(y = m_hs[, "Healthy"]/ n_pt, 
+       x = rownames(m_hs),
+       type = 'l',
+       main = 'Health state membership over model cycles',
+       xlab = 'Cycle number',
+       ylab = 'Proportion of individuals')
+  lines(y = m_hs[, "NewAneurysm"]/ n_pt, 
+        x = rownames(m_hs), 
+        col = 'red')
+  lines(y = m_hs[, "DetectedAneurysm"]/ n_pt, 
+        x = rownames(m_hs), 
+        col = 'blue')
+  lines(y = m_hs[, "DeathOther"]/ n_pt, 
+        x = rownames(m_hs), 
+        col = 'orange')
+  lines(y = m_hs[, "DeathTreatment"]/ n_pt, 
+        x = rownames(m_hs), 
+        col = 'lightgrey')
+  legend("right",  
+         legend = v_names_hs, 
+         col = c('black', 'red', 'blue', 'orange', 'lightgrey'),
+         lty = 1
+  )
+  
+  
+})
+
+output$tbl_cohort <- renderTable({
+  cbind("Cycle" = c(0:abs(nrow(m_hs_fct())-1)), m_hs_fct())
+  }, 
+  digits = 0)
+
+output$tbl_cum <- renderTable({
+  m_hs <- m_hs_fct()
+  
+  n_months_Healthy <- round(cumsum(m_hs[, "Healthy"])[36])
+  n_months_NewAneurysm <- round(cumsum(m_hs[, "NewAneurysm"])[36])
+  n_months_DetectedAneurysm <- round(cumsum(m_hs[, "DetectedAneurysm"])[36])
+  n_total <- sum(n_months_Healthy, n_months_NewAneurysm, n_months_DetectedAneurysm)
+  
+  return(cbind(n_months_Healthy,
+               n_months_NewAneurysm,
+               n_months_DetectedAneurysm,
+               n_total))
+  
+}, 
+digits = 0)
+
 
 
 }

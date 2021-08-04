@@ -158,7 +158,7 @@ m_tp["DeathTreatment", "DeathTreatment"] <- 1
 
 ## 4.b. To evaluate the progression of individuals over multiple cycle,
 ## we need to define:
-n_cycles <- 65 # the number of cycles to simulate, assume 65 cycles
+n_cycles <- 36 # the number of cycles to simulate, assume 3 years
 n_pt <- 10000  # the size of the cohort, assume 10000 persons
 m_hs <- matrix(0, 
                nrow = n_cycles + 1,
@@ -223,9 +223,9 @@ round(sum(m_hs[37, "Healthy"], m_hs[37, "NewAneurysm"], m_hs[37, "DetectedAneury
 ## 4.d. Use your cohort simulation to calculate the cumulative number of person-months that is spent in the health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.  
 ## Assume that we count state membership at the beginning of the cycle  
 ## HINT: Use the cumsum() function
-n_months_Healthy_3years <- cumsum(m_hs[1:36, "Healthy"])[36]
-n_months_NewAneurysm_3years <- cumsum(m_hs[1:36, "NewAneurysm"])[36]
-n_months_DetectedAneurysm_3years <- cumsum(m_hs[1:36, "DetectedAneurysm"])[36]
+n_months_Healthy_3years <- cumsum(m_hs[, "Healthy"])[36]
+n_months_NewAneurysm_3years <- cumsum(m_hs[, "NewAneurysm"])[36]
+n_months_DetectedAneurysm_3years <- cumsum(m_hs[, "DetectedAneurysm"])[36]
 
 ## 4.e. e)	Can you determine the average number of months that individuals in this model are alive, over the 3 year time horizon? Hint: you know the cohort size (10,000).
 sum(n_months_Healthy_3years,
@@ -286,19 +286,70 @@ head(m_hs_2)
 ## Inspect whether the sum of all rows equal 10000 (thus if you do not 'loose' or add any individuals in your simulation)
 which(round(rowSums(m_hs_2), 10) != 10000) # check rowsums  = 10000 --> 0 --> good!
 
-## 4.c.	Use your cohort simulation to calculate the number of individuals being alive after exactly 3 years. 
-## Remember that individuals only remain alive if they are in one of the three health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.
-round(sum(m_hs_2[37, "Healthy"], m_hs_2[37, "NewAneurysm"], m_hs_2[37, "DetectedAneurysm"]))
-
-## 4.d. Use your cohort simulation to calculate the cumulative number of person-months that is spent in the health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.  
-## Assume that we count state membership at the beginning of the cycle  
-## HINT: Use the cumsum() function
+## Re-calculate the cummulative number of individuals
 n_months_Healthy_3years_2 <- cumsum(m_hs_2[1:36, "Healthy"])[36]
 n_months_NewAneurysm_3years_2 <- cumsum(m_hs_2[1:36, "NewAneurysm"])[36]
 n_months_DetectedAneurysm_3years_2 <- cumsum(m_hs_2[1:36, "DetectedAneurysm"])[36]
 
-## 4.e. e)	Can you determine the average number of months that individuals in this model are alive, over the 3 year time horizon? Hint: you know the cohort size (10,000).
+## Answer
 sum(n_months_Healthy_3years_2,
     n_months_NewAneurysm_3years_2,
     n_months_DetectedAneurysm_3years_2
+)/n_pt
+
+
+## 4.f.	g)	First reset the parameters pDeathOther to value 0.1 and pTreatmentIsFatal to value 0.2. 
+## What do you think will happen if we increase the sensitivity of the test to detect new aneurysms, from looking at the model structure? 
+## Change the value of the parameter “p_AneurysmDetection” from 0.50 to 0.80 and determine again the average number of months that individuals in this model are alive, after 3 years. Can you explain the result? 
+### HINT: To do so, clone the transition matrix, modify these two probabilities, and reiterate the cohort simulation
+
+# Clone transition matrix
+m_tp_3 <- m_tp
+
+# Re-define transition probabilities
+p_AneurysmDetection  <- 0.80 # Probability to detect the Aneurysm
+
+# Re-define transitions in m_tp_3
+m_tp_3["Healthy", "Healthy"]     <- 1- p_NewAneurysm - p_DeathOther # Example
+m_tp_3["Healthy", "DeathOther"]  <- p_DeathOther
+m_tp_3["Healthy", "NewAneurysm"] <- p_NewAneurysm
+m_tp_3["NewAneurysm", "DetectedAneurysm"] <- p_AneurysmDetection
+m_tp_3["NewAneurysm", "DeathOther"] <- p_DeathOther
+m_tp_3["NewAneurysm", "NewAneurysm"] <- 1 - p_AneurysmDetection - p_DeathOther
+m_tp_3["DetectedAneurysm", "Healthy"] <- 1 - p_TreatmentIsFatal
+m_tp_3["DetectedAneurysm", "DeathTreatment"] <- p_TreatmentIsFatal
+m_tp_3["DeathOther", "DeathOther"] <- 1
+m_tp_3["DeathTreatment", "DeathTreatment"] <- 1
+
+# Re-define matrix of health states
+m_hs_3 <- matrix(0, 
+                 nrow = n_cycles + 1,
+                 ncol = length(v_names_hs),
+                 dimnames = list(c(0:n_cycles),
+                                 v_names_hs))
+m_hs_3[1, ] <- v_start_hs # Define state membership start
+
+# matrix multiplication to fill cohort simulation
+for(cycle in 1:n_cycles){
+  
+  # For your matrix of health state
+  m_hs_3[cycle + 1, ] <- m_hs_3[cycle, ] %*% m_tp_3 # matrix multiplication
+  
+}
+
+## Inspect the first row of the cohort simulation, using the head() function
+head(m_hs_3)
+
+## Inspect whether the sum of all rows equal 10000 (thus if you do not 'loose' or add any individuals in your simulation)
+which(round(rowSums(m_hs_3), 10) != 10000) # check rowsums  = 10000 --> 0 --> good!
+
+## Re-calculate the cummulative number of individuals
+n_months_Healthy_3years_3 <- cumsum(m_hs_3[1:36, "Healthy"])[36]
+n_months_NewAneurysm_3years_3 <- cumsum(m_hs_3[1:36, "NewAneurysm"])[36]
+n_months_DetectedAneurysm_3years_3 <- cumsum(m_hs_3[1:36, "DetectedAneurysm"])[36]
+
+## Answer
+sum(n_months_Healthy_3years_3,
+    n_months_NewAneurysm_3years_3,
+    n_months_DetectedAneurysm_3years_3
 )/n_pt
