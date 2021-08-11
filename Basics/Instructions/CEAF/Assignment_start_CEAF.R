@@ -1,7 +1,27 @@
+###############################
+#### Practical Discounting ####
+###############################
 
-##################
-#### Exercise ####
-##################
+#--------------#
+#### Set up ####
+#--------------#
+rm(list  = ls()) # clear environment
+options(scipen = 999) # remove scientific notation
+library(rstudioapi)
+setwd(dirname(getActiveDocumentContext()$path)) 
+
+df_thx <- readRDS("data_CEAF.rds") # Load data, CHANGE PATH ACCORDINGLY IF THE DATA DOES NOT LOAD AUTOMATICALLY!
+
+
+
+
+
+
+
+
+
+
+
 
 rm(list  = ls()) # clear environment
 options(scipen = 999) # remove scientific notation

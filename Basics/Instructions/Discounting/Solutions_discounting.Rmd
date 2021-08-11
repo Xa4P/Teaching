@@ -16,8 +16,7 @@ library(tidyverse)
 
 ```{r, echo = TRUE}
 rm(list  = ls()) # clear environment
-path_file <- "C:/Users/PouwelsXGLV/Documents/Onderwijs/Teaching/Basics/"
-df_thx <- readRDS(paste0(path_file,"Discounting/data_discount.rds")) # Load data
+df_thx <- readRDS("data_discount.rds") # Load data
 
 # Define discount rates
 r_disc <- 0.05
@@ -55,8 +54,9 @@ kable(v_icer_undisc)
 4. Create a vector of discount weights for Years 0 to 12.
 
 ```{r, echo = TRUE}
-v_disc <- 1/(1+r_disc)^df_thx$Year # create vector of discount rates
-kable(v_disc) # show
+v_disc <- 1/(1+r_disc)^df_thx$Year # create vector of discount weights
+kable(v_disc,
+      digits = 3) # show
 ```
 
 5. Apply discounting on the incremental effects and costs (by multiplying each column by the vector of discount weights fo instance) to convert these to their present value. Report the discounted effects and costs in new columns called Inc_cost_A_d, Inc_QALY_A_d, Inc_cost_B_d, Inc_QALY_B_d, Inc_cost_C_d, Inc_QALY_C_d.   
@@ -71,7 +71,8 @@ df_thx$Inc_cost_C_d <- df_thx$Inc_cost_C * v_disc
 df_thx$Inc_QALY_C_d <- df_thx$Inc_QALY_C * v_disc
 
 kable(df_thx[,c("Year", "Inc_cost_A", "Inc_QALY_A", 
-                "Inc_cost_A_d", "Inc_QALY_A_d")]) # show difference for intervention A
+                "Inc_cost_A_d", "Inc_QALY_A_d")],
+      digits = 3) # show difference for intervention A
 ```
 6. Calculate the total **discounted** incremental costs and effects, and ICERs for each intervention.  
 
@@ -79,7 +80,8 @@ kable(df_thx[,c("Year", "Inc_cost_A", "Inc_QALY_A",
 v_res_disc <- colSums(df_thx[, c("Inc_cost_A_d", "Inc_QALY_A_d",
                                  "Inc_cost_B_d", "Inc_QALY_B_d",
                                  "Inc_cost_C_d", "Inc_QALY_C_d")]) # calculate totals - discounted
-kable(v_res_disc)
+kable(v_res_disc,
+      digits = 3)
 
 v_res_disc <- unname(v_res_disc)
 
@@ -88,7 +90,8 @@ v_icer_disc <- c(ICER_A = v_res_disc[1]/v_res_disc[2],
                    ICER_C = v_res_disc[5]/v_res_disc[6]
 ) # calculate discounted ICERs
 
-kable(v_icer_disc)
+kable(v_icer_disc,
+      digits = 3)
 ```
 
 6.a. Question: what are the total **discounted** incremental costs and effects for each intervention? Which intervention provides the highest **discounted** incremental costs and effects?  
@@ -119,8 +122,13 @@ m_res_total <- rbind(v_icer_undisc,
                    v_icer_disc10)
 kable(rbind(v_res_undisc,
         v_res_disc, 
-        v_res_disc10), caption = "Totals using the different discount rates")
-kable(m_res_total, caption = "ICERs using the different discount rates") #  show results
+        v_res_disc10), 
+      caption = "Totals using the different discount rates",
+      digits = 3)
+
+kable(m_res_total, 
+      caption = "ICERs using the different discount rates",
+      digits = 3) #  show results
 
 df_res <- data.frame(cbind(Analysis = c("Undiscounted", "5% discount", "10% discount")),
                      m_res_total)
