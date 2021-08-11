@@ -12,6 +12,7 @@ setwd(dirname(getActiveDocumentContext()$path))
 
 # Load function
 source("fct_bootstrap.R")
+source("fct_pa.R")
 
 # Define UI ----
 ui <- fluidPage(
@@ -22,7 +23,7 @@ ui <- fluidPage(
                       h2("Welcome to the assignment on performing cost-effectiveness analyses.")
                )
              )
-             ),
+    ),
     # Assignment 1 - Trial-based CEA ----
     tabPanel("Assignment 1 - Trial-based CEA", fluid = TRUE,
              sidebarLayout(
@@ -242,6 +243,107 @@ ui <- fluidPage(
                  tags$hr(),
                  h3("Discounted results per individual"),
                  tableOutput("tbl_res_d"),
+                 tags$hr()
+               )
+             )
+             
+    ),
+    # Assignment HSTM 2C ----
+    tabPanel("Assignment HSTM 2C - inputs", fluid = TRUE,
+             fluidPage(
+               column(width = 12,
+                 h3("This part of the assignment illustrates the principle of the probabilistic analysis"),
+                 h4("First, the mean parameters (used for the deterministic analysis), their standard error and the distribution used for the probabilistic analysis are provided"),
+                 h4("Second, the summary statistics of the probabilistic parameters are provided."),
+                 h4("Third, the first 100 sets of parameters are shown, these are used in the first 100 iterations of the probabilistic analysis"),
+                 h4("On the next page, you can explore the results the probabilistic analysis"),
+                 h4("Instructions: Determine the number of simulation (and seed number to use) you want to run (at least 1,000) and push the button to run the probabilistic analysis. You can also modify the mean and standard error of the efficacy of aspirin and starting age of the cohort."),
+                 h4("Follow the instruction of the assignment and answer the questions. Keep them for the discussion."),
+                 numericInput(inputId = "n_sim_pa",
+                              label = "Number of iteration to perform (between 1 and 10,000)",
+                              value = 1000,
+                              min = 1,
+                              max = 10000),
+                 numericInput(inputId = "seed_num_pa",
+                              label = "Seed number to use to generate probabilistic parameters",
+                              value = 1,
+                              min = 1,
+                              max = Inf),
+                 numericInput(inputId = "mean_eff",
+                              label = "Mean efficacy of apirin on the occurence of MI",
+                              value = 0.60,
+                              min = 0,
+                              max = 1),
+                 numericInput(inputId = "se_eff",
+                              label = "Standard error of the mean efficacy of apirin on the occurence of MI",
+                              value = 0.15,
+                              min = 0,
+                              max = 0.5),
+                 numericInput(inputId = "n_start_age_pa",
+                              label = "Starting age cohort for probabilistic analysis",
+                              value = 45,
+                              min = 20,
+                              max = 95),
+                 actionButton(inputId = "do_pa",
+                              label = "Push to perform the Probabilistic Analysis!")
+               ),
+               column(width = 6,
+                 h3("Mean parameters, standard error, and associated distribution"),
+                 tableOutput("inputs_det"),
+                 tags$hr()
+               ), 
+               column(width = 6,
+                 h3("Summary statistics of probabilistic inputs"),
+                 tableOutput("inputs_pa_summary"),
+                 tags$hr()
+               ),
+               column(width = 12,
+                 h3("All probabilistic inputs"),
+                 tableOutput("inputs_pa")
+               )
+             )
+             
+    ),
+    tabPanel("Assignment HSTM 2C - Results", fluid = TRUE,
+             fluidPage(
+               column(
+                 width = 12,
+                 h3("This tab shows the probabilistic results in the incremental cost-effectiveness plane and the cost-effectiveness acceptability curve.")
+               ),
+               column(
+                 width = 6,
+                 h3("Cost-effectiveness plane"),
+                 plotOutput("ce_pa"),
+                 tags$hr()
+               ),
+               column(
+                 width = 6,
+                 h3("Summary statistics of the probabilistic results -  QALY and costs"),
+                 tableOutput("tbl_res_pa"),
+                 tags$hr()
+               ),
+               column(
+                 width = 7,
+                 h3("Incremental cost-effectiveness plane"),
+                 plotOutput("ice_pa"),
+                 tags$hr()
+               ),
+               column(
+                 width = 5,
+                 h3("Incremental cost-effectiveness plane - summary statistics"),
+                 tableOutput("tbl_ice_pa"),
+                 tags$hr()
+               ),
+               column(
+                 width = 6,
+                 h3("Cost-effectiveness acceptability curve"),
+                 plotOutput("ceac_pa"),
+                 tags$hr()
+               ),
+               column(
+                 width = 6,
+                 h3("Cost-effectiveness acceptability curve - summary"),
+                 tableOutput("tbl_ceac"),
                  tags$hr()
                )
              )
@@ -1007,6 +1109,287 @@ output$tbl_res_d <- renderTable({
   l_output_hstm()$df_res_d
 })
 
+# Assignment HSTM 2C ----
+# Perform PA 
+
+l_res_pa <- eventReactive(input$do_pa, {
+  
+  # Generate probabilistic inputs
+  df_inputs_pa <- generate_pa_inputs(n_sim = input$n_sim_pa, 
+                                     mean_eff_mi = input$mean_eff,
+                                     se_eff_mi = input$se_eff, # for shiny app --> variation around
+                                     seed_num = input$seed_num_pa)
+
+  # Perform PA
+  ## Initialise matrix outcomes
+  m_res_pa <- matrix(0, 
+                     ncol = 4,
+                     nrow = input$n_sim_pa,
+                     dimnames = list(c(1:input$n_sim_pa),
+                                     c("QALY_comp",
+                                       "QALY_int",
+                                       "Costs_comp",
+                                       "Costs_int")))
+  for(i in 1:input$n_sim_pa) {
+    
+    l_params_temp <- as.list(df_inputs_pa[i, ])
+    
+    m_res_pa[i, ] <- perform_simulation(l_params = l_params_temp, 
+                                        start_age = input$n_start_age_pa,
+                                        verbose = FALSE)
+  }
+  
+  return(list(df_inputs_pa = df_inputs_pa,
+              m_res_pa = m_res_pa))
+  
+}
+)
+
+
+output$inputs_det <- renderTable({
+  df <- data.frame(
+    Name = c("r_fatal_mi", 
+             "r_fatal_stroke", 
+             "r_inc_mi", 
+             "r_inc_stroke", 
+             "p_post_major_stroke",
+             "eff_mi", 
+             "eff_stroke", 
+             "u_healthy", 
+             "u_post_mi", 
+             "u_post_minor_stroke", 
+             "u_post_major_stroke", 
+             "u_aspirin_use", 
+             "c_aspirin_use", 
+             "c_post_mi", 
+             "c_post_minor_stroke", 
+             "c_post_major_stroke" 
+             ),
+    Mean = c(0.25,
+             0.3,
+             400 / 100000,
+             50 / 100000,
+             235 / 1000,
+             0.6,
+             1.2,
+             1,
+             0.85,
+             0.75,
+             0.5,
+             99,
+             100,
+             8000,
+             2000,
+             20000
+             ),
+    SE = c(round(sqrt((25 / 100 * (1 -  25 / 100)) / 100), 3),
+           round(sqrt((30 / 100 * (1 -  30 / 100)) / 100), 3),
+           round(sqrt((400 / 100000 * (1 - 400 / 100000)) / 100000), 3),
+           round(sqrt((50 / 100000 * (1 - 50 / 100000)) / 100000), 3),
+           round(sqrt((235 / 1000 * (1 -  235 / 1000)) / 1000), 3),
+           0.15,
+           0.1,
+           0,
+           0.85,
+           0.75,
+           0.5,
+           0,
+           round(100 * 0.25, 0),
+           round(8000 * 0.25, 0),
+           round(2000 * 0.25, 0),
+           round(20000 * 0.25, 0)
+           ),
+    Distribution = c(rep("Beta", 5),
+                     rep("Normal", 2),
+                     "Fixed",
+                     rep("Beta", 3),
+                     "Fixed",
+                     rep("Gamma", 4)
+                     )
+  )
+  
+  df
+  
+}, 
+digits = 3)
+
+output$inputs_pa_summary <- renderTable({
+  df <- l_res_pa()$df_inputs_pa
+  
+  df_summary <- data.frame(
+    Parameter = colnames(df),
+    Mean = apply(df, 2, mean),
+    SD = apply(df, 2, sd),
+    Percentile_2.5th = apply(df, 2, function(x) quantile(x, 0.025)),
+    Percentile_97.5th = apply(df, 2, function(x) quantile(x, 0.975)),
+    Min = apply(df, 2, min),
+    Max = apply(df, 2, max)
+  )
+  
+  df_summary
+  
+},
+digits = 3
+)
+
+output$inputs_pa <- renderTable({
+  df <- l_res_pa()$df_inputs_pa
+  head(df, 100)
+},
+digits = 3)
+
+output$tbl_res_pa <- renderTable({
+  m_res <- l_res_pa()$m_res_pa
+  df <- as.data.frame(m_res)
+  
+  df$Incremental_QALY <- df$QALY_int - df$QALY_comp
+  df$Incremental_Costs <- df$Costs_int - df$Costs_comp
+  
+  df_summary <- data.frame(
+    Outcome = colnames(df),
+    Mean = apply(df, 2, mean),
+    SD = apply(df, 2, sd),
+    Percentile_2.5th = apply(df, 2, function(x) quantile(x, 0.025)),
+    Percentile_97.5th = apply(df, 2, function(x) quantile(x, 0.975)),
+    Min = apply(df, 2, min),
+    Max = apply(df, 2, max)
+  )
+  df_summary <- data.frame(rbind(df_summary,
+        c("ICER_QALY", round(mean(df$Incremental_Costs)/ mean(df$Incremental_QALY), 0) , rep(NA, ncol(df_summary) - 2))
+  )
+  )
+  df_summary[, 2:ncol(df_summary)] <- apply(df_summary[, 2:ncol(df_summary)], 2, function (x) as.numeric(as.character(x)))
+  df_summary[, 2:ncol(df_summary)] <- apply(df_summary[, 2:ncol(df_summary)], 2, function (x) round(x, 3))
+  df_summary
+}, 
+digits = 3)
+
+
+output$ce_pa <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  
+  df_res <- as.data.frame(m_res)
+  
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  
+  ggplot(df_res) + 
+    #ggtitle("Incremental cost-effectiveness plane") +
+    geom_point(aes(x = QALY_comp, y = Costs_comp, colour = "No Aspirin"), shape = 1) + 
+    geom_point(aes(x = QALY_int, y = Costs_int, colour = "Aspirin"), shape = 1) +
+    xlab ("Total QALY") + 
+    ylab("Total Costs") +
+    geom_hline(yintercept = 0,  
+               color = "black") +
+    geom_vline(xintercept = 0,  
+               color = "black") + 
+    xlim(c(min(c(df_res$QALY_int, df_res$QALY_comp)), max(c(df_res$QALY_int, df_res$QALY_comp)))) +
+    scale_colour_manual(name = "",
+                        values = c(Aspirin = "orange", 
+                                   `No Aspirin` = "grey"
+                        )) +
+    theme_bw() + 
+    theme(legend.position="bottom") 
+  
+})
+
+output$ice_pa <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  
+  df_res <- as.data.frame(m_res)
+  
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  
+  ggplot(df_res) + 
+    #ggtitle("Incremental cost-effectiveness plane") +
+    geom_point(aes(x = Inc_QALY, y = Inc_C, colour = "Incrementals"), shape = 1) + 
+    geom_point(aes(x = mean(Inc_QALY), y = mean(Inc_C), colour = "Incrementals(mean)"), size = 2) +
+    xlab ("Incremental QALY") + 
+    ylab("Incremental costs") +
+    geom_hline(yintercept = 0,  
+               color = "black") +
+    geom_vline(xintercept = 0,  
+               color = "black") + 
+    geom_abline(intercept = 0, slope = 20000, linetype= "dashed", 
+                color = "black") + # 20,000 per QALY threshold line
+    #xlim(c(0,1)) +
+    scale_colour_manual(name = "",
+                        values = c(Incrementals = "orange", 
+                                   `Incrementals(mean)` = "darkblue"
+                                   )) +
+    theme_bw() + 
+    theme(legend.position="bottom") 
+  
+})
+output$ceac_pa <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  
+  m_res_ceac <- calculate_CEAC(Q.trt = m_res[, "QALY_int"],
+                               C.trt = m_res[, "Costs_int"],
+                               Q.comp = m_res[, "QALY_comp"], 
+                               C.comp = m_res[, "Costs_comp"],
+                               v.wtp = seq(from = 0, to = 100000, by = 1000)
+                               )
+  
+  df_CEAC <- as.data.frame(m_res_ceac)
+
+  ggplot(data = df_CEAC, aes(x= WTP.threshold, y = Prob.trt)) + 
+    #ggtitle("Cost-effectiveness acceptability curve") +
+    geom_line(aes(colour = "Aspirin"), linejoin = "bevel") + ylim(c(0, 1)) +
+    geom_line(aes(colour = "No Aspirin", x = WTP.threshold, y = 1- Prob.trt)) +
+    scale_colour_manual(name = "",
+                        values = c(Aspirin = "orange", 
+                                   `No Aspirin` = "grey"
+                        )) +
+    xlab("Willingness to pay thresholds") + 
+    #scale_x_continuous(labels = dollar_format(prefix = "\u20ac ", suffix = "")) +
+    ylab("Probability of being cost effective") +
+    theme_bw()
+})
+
+
+output$tbl_ice_pa <- renderTable({
+  m_res <- l_res_pa()$m_res_pa
+  
+  df_res <- as.data.frame(m_res)
+  
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  
+  df <- data.frame(
+    Quadrant = c("NorthEast (more effective, more expensive)", "SouthEast (more effective, less expensive)",
+                 "NorthWest (less effective, more expensive)", "SouthWest (less effective, less expensive)"),
+    Percentage = c(paste(round(length(which(df_res$Inc_QALY > 0 & df_res$Inc_C > 0)) / nrow(df_res) * 100, 0), "%", sep = ""),
+                   paste(round(length(which(df_res$Inc_QALY > 0 & df_res$Inc_C < 0)) / nrow(df_res) * 100, 0), "%", sep = ""),
+                   paste(round(length(which(df_res$Inc_QALY < 0 & df_res$Inc_C > 0)) / nrow(df_res) * 100, 0), "%", sep = ""),
+                   paste(round(length(which(df_res$Inc_QALY < 0 & df_res$Inc_C < 0)) / nrow(df_res) * 100, 0), "%", sep = "")
+    )
+  )
+  
+  df
+})
+output$tbl_ceac <- renderTable({
+  
+  m_res <- l_res_pa()$m_res_pa
+  
+  m_res_ceac <- calculate_CEAC(Q.trt = m_res[, "QALY_int"],
+                               C.trt = m_res[, "Costs_int"],
+                               Q.comp = m_res[, "QALY_comp"], 
+                               C.comp = m_res[, "Costs_comp"],
+                               v.wtp = seq(from = 0, to = 100000, by = 1000)
+  )
+  
+  df_CEAC <- as.data.frame(m_res_ceac)
+  
+  names(df_CEAC) <- c("Willingness_to_pay", "Prob_Asp", "Prob_No_Asp")
+  
+  df_CEAC[, c(2,3)] <- apply(df_CEAC[, c(2,3)], 2, function(x) paste(round(x * 100, 0), "%", sep = ""))
+  
+  df_CEAC[which(df_CEAC[, 1] %in% seq(0, 100000, 5000)),]
+  
+},
+digits = 0)
 
 }
 
