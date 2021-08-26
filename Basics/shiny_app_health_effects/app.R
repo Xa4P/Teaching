@@ -11,7 +11,7 @@ library(diagram)
 # Load functions and inputs
 source("EQ-5D-5L_fct.R")
 source("function_sf_36.R")
-load("Basics/shiny_app_health_effects/EQ5D5L_NLtariff.RData")# load table decrements
+load("EQ5D5L_NLtariff.RData")# load table decrements
 
 
 # Define UI ----
