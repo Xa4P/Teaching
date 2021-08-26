@@ -7,7 +7,7 @@ library(magrittr)
 library(rsvg)
 
 string_graph_text <- paste0(as.character("graph LR; A[Detection] --> |Watchful waiting| B(( ));
-                                    A --> |Aneurism treatment| C(( )); B --> |"), 
+                                    A --> |Aneurysm treatment| C(( )); B --> |"), 
                             "Aneurysm rupture",
                        as.character("| D(( ));"),
                        as.character("B --> |"), "Aneurysm remains stable",
@@ -41,7 +41,7 @@ string_graph_text <- paste0(as.character("graph LR; A[Detection] --> |Watchful w
 )
 
 string_graph_probs_txt <- paste0(as.character("graph LR; A[Detection] --> |Watchful waiting| B(( ));
-                                    A --> |Aneurism treatment| C(( )); B --> |"), 
+                                    A --> |Aneurysm treatment| C(( )); B --> |"), 
                                  "p_Rupture",
                              as.character("| D(( ));"),
                              as.character("B --> |"), "p_Stable",

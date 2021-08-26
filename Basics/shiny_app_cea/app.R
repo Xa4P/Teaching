@@ -6,9 +6,6 @@
 rm(list= ls())
 library(shiny)
 library(tidyverse)
-library(rstudioapi)
-
-setwd(dirname(getActiveDocumentContext()$path)) 
 
 # Load function
 source("fct_bootstrap.R")

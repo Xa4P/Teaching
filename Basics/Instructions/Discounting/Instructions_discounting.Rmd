@@ -39,7 +39,7 @@ This object contains 7 variables:
 \newpage
 # Assignment and questions  
 
-1. Define a new object `r_disc`, which is the discount rate that will be used in the current assignment, and set its value to `0.05` (meaning 5% discount annualy)
+1. Define a new object `r_disc`, which is the discount rate that will be used in the current assignment, and set its value to `0.05` (meaning 5% discount annually)
 2. Calculate the total undiscounted incremental costs and effects for each intervention  
 3. Calculate the **undiscounted** ICERS for each of these interventions using the total incremental costs and effects you calculated under step 2  
 3.a. Question: what are the total incremental costs and effects for each intervention? Which intervention provides the highest **undiscounted** incremental costs and effects?  

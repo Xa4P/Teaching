@@ -23,10 +23,7 @@ p_DeathOther        <- 	0.10 # Probability of death due to causes unrelated to a
 #1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j). 
 ##a. The probability than an individual dies from aneurysm treatment in month 2
 
-## Explanation: It is not possible to reach the DeathTreatment state in 2 cycles
-
 ##b. The probability that an individual starts in the Healthy state and remains there, that is, survives and does not develop an aneurysm, in 1 year
-
 
 ##c. The probability that an individual develops 2 aneurysms and is treated successfully twice, in 6 months’ time
 

@@ -77,5 +77,5 @@ runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 7.a. Check the average estimates from the bootstrap samples. Do these results correspond to the point estimates from the observed data?  
 7.b. Check the confidence intervals for the additional health effects and for the additional costs of the intervention. Can you explain why they are so wide?  
 7.c. Check the probabilities of a cost-effectiveness outcome in each one of the four quadrants. How well did you guess the probability that the new intervention is cheaper, or improves health (questions 3b and c)?  
-7.d. No confidence interval is given for the ICER (cell M64) can you explain why such a confidence interval is not informative by looking at the incremental CEA plane in column AA? 
+7.d. No confidence interval is given for the ICER (cell M64) can you explain why such a confidence interval is not informative by looking at the incremental CEA plane in column AA?  
 7.e. Rerun the bootstrap procedure 3 times using different seed numbers. Do the results of the bootstrap analysis change substantially? What would we need to do to reduce this variation in outcomes?  

@@ -4,9 +4,9 @@
 
 # Set up
 rm(list = ls())
-install.packages(shiny) # install this package if not already done
-install.packages(diagram) # install this package if not already done
-install.packages(tidyverse) # install this package if not already done
+install.packages("shiny") # install this package if not already done
+install.packages("diagram") # install this package if not already done
+install.packages("tidyverse") # install this package if not already done
 
 # Load package
 library(shiny)

@@ -7,11 +7,8 @@ rm(list= ls())
 library(shiny)
 library(tidyverse)
 library(diagram)
-library(rstudioapi) 
 
-#setwd(dirname(getActiveDocumentContext()$path))
-
-NL_tariff <- read.csv("EQ5D5L_NLtariff.csv", sep = ";")# load table decrements
+NL_tariff <- read.csv2("EQ5D5L_NLtariff.csv", sep = ";")# load table decrements
 
 # Load function
 source("EQ-5D-5L_fct.R")

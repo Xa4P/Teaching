@@ -22,7 +22,7 @@ The aim of this practical assignment is to get you acquainted with the principle
   
 1. Download the folder `Practical_HSTM_1` from the Canvas page and save it on your computer  
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
-2. Open the `Assignment_start.R` file and follow the instructions of this document or in the R file (these are the same). Use the model structure on the enxt page to perform the assignment.       
+2. Open the `Assignment_HSTM1_start.R` file and follow the instructions of this document or in the R file (these are the same). Use the model structure on the enxt page to perform the assignment.       
 3. During the completion of the assignment, answer the questions of this document    
 
 \newpage
@@ -37,8 +37,8 @@ knitr::include_graphics("Fig_model_structure.png")
 \newpage
 # Questions
 
-1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment_start.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j).  
-1.a. The probability than an individual dies from aneurysm treatment in month 2  
+1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment_HSTM1_start.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j).  
+1.a. The probability that an individual dies from aneurysm treatment in month 2  
 1.b. The probability that an individual starts in the Healthy state and remains there, that is, survives and does not develop an aneurysm, in 1 year  
 1.c. The probability that an individual develops 2 aneurysms and is treated successfully twice, in 6 months’ time  
 1.d. The probability that an individual dies of other causes within the first month  
@@ -52,7 +52,7 @@ knitr::include_graphics("Fig_model_structure.png")
 2.a.	To evaluate the life course of individuals over a large number of time cycles we need a transition matrix. Create a transition matrix (called `m_tp`) containing 5 rows and 5 columns (using the matrix() function). Assign the value 0 to all cells of the matrix to start with. Name the rows and column (argument dimnames of the function): "Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment".  
 2.b. Fill the matrix with the values of the transition probabilities. The rows indicate the health state from which persons transit. The columns indicate the health state to which persons transit. You can use the names of the rows and columns to assign the transition probabilities to each cell. Do not forget to define the probability of remaining in a health state!  
 2.c. Check whether all rows sum up to one (using the rowSums() function for instance).  
-3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment.R` in the left panel. Check whether you correctly filled the transition matrix manually. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
+3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment_HSTM1_start.R` in the left panel. Check whether you correctly filled the transition matrix manually. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
 
 ```{r, echo = T, eval = F}
 runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
@@ -65,7 +65,7 @@ runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 3.f. Change the starting distribution of the model (using the input fields) to reflect 50% individuals starting in the "New Aneurysm" state and 50% starting in the "Detected Aneurysm" state. How does this change the probability of an individual being healthy after exactly 1 year? Compare your answer to the answer of question 3.a.  
 3.g. Why doesn’t the distribution of individuals over the health states change when you apply a time horizon of 7 years instead of 6 years?  
 
-4. Re-open your `Assignment_start.R` file to perform the cohort simulation.    
+4. Re-open your `Assignment_HSTM1_start.R` file to perform the cohort simulation.    
 This part of the assignment focuses on modelling the disease progression of individuals through the cohort simulation using the matrix (`m_tp`) you just defined. The method used to perform these calculations are described extensively in @Alarid_Escudero_2020.  
 4.a. (Re)define (or re-use) `m_tp` as in the previous assignment using the transition probabilities.  
 4.b. To evaluate the progression of individuals over multiple cycle, define the following objects:  
@@ -76,7 +76,8 @@ This part of the assignment focuses on modelling the disease progression of indi
 Once you have determined these parameters, use `v_start_hs` to determine the starting position of the individuals in the simulation.  
 Afterwards, perform the matrix multiplication to determine the health state membership of all individuals over the cycles. To determine the number of individuals in each health state during each cycle, one need to multiply the vector of state membership in the previous cycle (so, the previous row in `m_hs`) by the transition matrix (`m_tp`).  
 Example: to calculate the number of individuals in each health state in cycle 1, multiply the state membership in cycle 0, `m_hs[1, ]` (cycle 0 is row 1 because there is no row 0 in R), by the transition matrix, `m_tp`.
-*HINT:* to do these calculation automatically, use a a for loop over rows 1 to `n_cycles` of the `m_hs` matrix. 4.c. Use your cohort simulation to calculate the number of individuals being alive after exactly 3 years. Remember that individuals only remain alive if they are in one of the three health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.  
+*HINT:* to do these calculation automatically, use a a for loop over rows 1 to `n_cycles` of the `m_hs` matrix.  
+4.c. Use your cohort simulation to calculate the number of individuals being alive after exactly 3 years. Remember that individuals only remain alive if they are in one of the three health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.  
 4.d. Use your cohort simulation to calculate the cumulative number of person-months that is spent in the health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”. Assume that we count state membership at the beginning of the cycles.  
 *HINT:* Use the cumsum() function  
 4.e. Can you determine the average number of months that individuals in this model are alive, over the 3 year time horizon?  

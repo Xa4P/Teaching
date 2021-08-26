@@ -15,8 +15,7 @@ options(scipen = 999) # Disable scientific notations
 library(tidyverse)
 library(knitr)
 
-path_file <- "C:/Users/PouwelsXGLV/Documents/Onderwijs/Teaching/Basics/"
-df_thx <- readRDS(paste0(path_file,"data_CEAF.rds")) # Load data
+df_thx <- readRDS("data_CEAF.rds") # Load data
 
 kable(df_thx) # Show data frame
 ```

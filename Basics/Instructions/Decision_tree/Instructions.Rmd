@@ -16,7 +16,7 @@ library(knitr)
 ```
 
 # Aim
-The aim of this practical assignment is to perform a health economic analysis using a decision tree. You are asked to evaluating the cost-effectiveness of a management strategie for patients with unruptured intracranial aneurysms versus watchful waiting.
+The aim of this practical assignment is to perform a health economic analysis using a decision tree. You are asked to evaluating the cost-effectiveness of a management strategy for patients with unruptured intracranial aneurysms versus watchful waiting.
 
 # Instuctions
   
@@ -27,7 +27,7 @@ The aim of this practical assignment is to perform a health economic analysis us
 
 \newpage
 # Decision tree
-This section provides an explaination of the decision tree used in this practical assignment. The decision tree compares two strategies: "Aneurism treatment" and "Watchful waiting". The "Detection" rectangle represents the decision node (i.e. the point where the different strategies are defined). Both main branches of the decision tree describe the possible trajectories for each of these strategies. The circles are the chance nodes. The first Figure provides a textual description of the trajectories, and the second provides a description of which probabilities belongs to each branch of the decision tree.  
+This section provides an explaination of the decision tree used in this practical assignment. The decision tree compares two strategies: "Aneurysm treatment" and "Watchful waiting". The "Detection" rectangle represents the decision node (i.e. the point where the different strategies are defined). Both main branches of the decision tree describe the possible trajectories for each of these strategies. The circles are the chance nodes. The first Figure provides a textual description of the trajectories, and the second provides a description of which probabilities belongs to each branch of the decision tree.  
 NOTE: the sum of the probabilities following a chance node must sum up to 1.  
 ```{r, fig.align = 'center', fig.cap = "Description decision tree", echo = F}
 knitr::include_graphics("DT_graph.png")

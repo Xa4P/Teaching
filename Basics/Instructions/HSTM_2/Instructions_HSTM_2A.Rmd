@@ -10,14 +10,14 @@ bibliography: [references.bib]
 knitr::opts_chunk$set(echo = TRUE)
 ```
 # Aim
-The aim of this practical assignment is to get you acquainted with the principle of health state transition models (HSTM). This assignmment focuses on evaluating the cost-effectiveness of aspirin treatment versus no aspirin treatment for the primary prevention of cardiovascular disease events using a Markov model. During this assignment, you will first define the cohort simulation of both strategies (using transition probabilities, and matrix multiplication) and then calculate the outcomes (quality-adjusted life years, costs). First, familiarise yourself with the model structure. on the next page.  
+The aim of this practical assignment is to get you acquainted with the principle of health state transition models (HSTM). This assignmment focuses on evaluating the cost-effectiveness of aspirin treatment versus no aspirin treatment for the primary prevention of cardiovascular disease events using a Markov model. During this assignment, you will first define the cohort simulation of both strategies (using transition probabilities, and matrix multiplication) and then calculate the outcomes (quality-adjusted life years, costs). First, familiarise yourself with the model structure on the next page.  
 The method described in this practical is more extensively described in @Alarid_Escudero_2020.  
 
 # Instuctions
   
 1. Download the folder `Practical_HSTM_2` from the Canvas page and save it on your computer  
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
-2. Open the `Assignment_start.R` file and follow the instructions of this document and in the R file. Use the model structure on the next page to perform the assignment.       
+2. Open the `Assignment_2A_start.R` file and follow the instructions of this document and in the R file. Use the model structure on the next page to perform the assignment.       
 3. During the completion of the assignment, answer the questions of this document    
 **DISCLAIMER: FOR THE FOLLOWING AASIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
 
@@ -30,7 +30,7 @@ knitr::include_graphics("Fig_model_structure.png")
 
 \newpage
 # Questions
-1. As you can see both strategies (prescribing aspirin or not) have similar diagrams. However, there will be differences in the values of the parameters applied in these strategies. First, we will focus on the course of patients not using aspirin. Have a look at the parameters which are already defined in the `Assignment_start.R` script.  
+1. As you can see both strategies (prescribing aspirin or not) have similar diagrams. However, there will be differences in the values of the parameters applied in these strategies. First, we will focus on the course of patients not using aspirin. Have a look at the parameters which are already defined in the `Assignment_2A_start.R` script.  
 1.a.	In making a health economic model we often have to combine evidence from different sources of literature. Assume that there was evidence that 235 out of 1,000 patients **who had a stroke and survived** moved into a post major stroke state (the remaining patients experienced a minor stroke). Based on this evidence, please define the parameter `p_minor_stroke` (probability of transiting to the "post-minor stroke" health state **after having experienced a NON-FATAL stroke** and `p_major_stroke` (probability of transiting to the "post-major stroke" health state **after having experienced a NON-FATAL stroke**.   
 1.b. From other sources, you found that the incidence rates for myocardial infarction (MI), stroke, and death from other causes were respectively **400, 50, and 650 per 100,000 person-years**. Calculate the yearly incidence rates of MI, stroke, and death from other causes than MI and stroke in the placeholder of parameters `r_inc_mi`, `r_inc_stroke`, and `r_mort`.  
 2. Based on the parameter values, determine the transition matrix of the "No aspirin" strategy, and call it `m_tp_comp` (for matrix transition probabilities of the comparator). Assume here that `r_mort` can be used to approximate the probability of ‘Death other’.  
