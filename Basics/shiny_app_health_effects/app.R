@@ -1045,9 +1045,9 @@ server <- function(input, output) {
    
    
    text_button_EQ5D_calc <- eventReactive(input$check_EQ5D_calc, {
-     if(as.numeric(as.character(input$res_EQ5D_1)) ==  round(estimate_utility(1, 2, 4, 2, 3), 3) &
-        as.numeric(as.character(input$res_EQ5D_2)) ==  round(estimate_utility(2, 5, 4, 3, 1), 3) &
-        as.numeric(as.character(input$res_EQ5D_3)) ==  round(estimate_utility(1, 1, 1, 2, 2), 3)
+     if(as.numeric(as.character(input$res_EQ5D_1)) ==  round(estimate_utility(1, 2, 4, 2, 3, tbl_decrements = NL_tariff), 3) &
+        as.numeric(as.character(input$res_EQ5D_2)) ==  round(estimate_utility(2, 5, 4, 3, 1, tbl_decrements = NL_tariff), 3) &
+        as.numeric(as.character(input$res_EQ5D_3)) ==  round(estimate_utility(1, 1, 1, 2, 2, tbl_decrements = NL_tariff), 3)
         ){
        paste("Good job, these are the correct answers")
      } else {
