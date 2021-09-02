@@ -44,7 +44,9 @@ knitr::include_graphics("Assignment_2_solution.png")
 # Assignment 5  
 
 **Answers:**  
-- EQ-5D-description first health state : 12423; utility value = 
-- EQ-5D-description second health state : 25431; utility value = 
-- EQ-5D-description third health state : 11122; utility value = 
+- EQ-5D-description first health state : 12423; utility value = 0.512  
+- EQ-5D-description second health state : 25431; utility value = 0.466  
+- EQ-5D-description third health state : 11122; utility value = 0.817  
+- What does a EQ-5D score of 55555 mean?  
+**Answer:** This is the worst imaginable health state according to the EQ-5D. It has a utility value below 0, which can be considered as a health state worst than "being dead". 
 
