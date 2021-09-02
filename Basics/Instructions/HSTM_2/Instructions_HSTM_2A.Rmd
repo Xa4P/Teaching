@@ -19,7 +19,7 @@ The method described in this practical is more extensively described in @Alarid_
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
 2. Open the `Assignment_2A_start.R` file and follow the instructions of this document and in the R file. Use the model structure on the next page to perform the assignment.       
 3. During the completion of the assignment, answer the questions of this document    
-**DISCLAIMER: FOR THE FOLLOWING AASIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
+**DISCLAIMER: FOR THE FOLLOWING ASSIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME AS RATES. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
 
 \newpage
 # Model structure  

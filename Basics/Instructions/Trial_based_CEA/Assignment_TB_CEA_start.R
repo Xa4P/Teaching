@@ -13,10 +13,13 @@ options(scipen = 999) # Disable scientific notations
 #install.packages("tidyverse") # if needed
 #install.packages("knitr") # if needed
 #install.packages("boot") # if needed
+#install.packages("rstudioapi") # if needed
 
-library(tidyverse)
+library(tidyverse) # you may need to put the names of packages within brackets
 library(knitr)
 library(boot)
+library(rstudioapi) 
+setwd(dirname(getActiveDocumentContext()$path)) # set working directory to current active file  
 
 load(file = "trial_based_CEA.RData")
 

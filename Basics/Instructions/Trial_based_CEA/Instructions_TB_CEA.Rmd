@@ -21,7 +21,7 @@ The aim of this practical assignment is to perform a health economic analysis us
 
 # Instuctions
   
-1. Download the folder `Practical_Trial_based_CEA` from the Canvas page and save it on your computer  
+1. Download the folder `Assingment_TB_CEA_start.R` and `trial_based_CEA.RData` from Canvas and save them in the same map.  
 2. Open the `Assingment_TB_CEA_start.R` file  
 3. Load the data for this assignment (`trial_based_CEA.RData`) using the `load()` function  
 4. When loaded, 8 objects (1 data frame, `df`, and 7 values) should appear in your environment  
@@ -30,6 +30,7 @@ The aim of this practical assignment is to perform a health economic analysis us
 
 # Required packages
 
+- `rstudioapi`: for setting the working directory to active R file  
 - `tidyverse`: for data manipulation and plotting    
 - `knitr`: for reporting, especially when using R markdown      
 - `boot`: for bootstrapping  
@@ -77,5 +78,5 @@ runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
 7.a. Check the average estimates from the bootstrap samples. Do these results correspond to the point estimates from the observed data?  
 7.b. Check the confidence intervals for the additional health effects and for the additional costs of the intervention. Can you explain why they are so wide?  
 7.c. Check the probabilities of a cost-effectiveness outcome in each one of the four quadrants. How well did you guess the probability that the new intervention is cheaper, or improves health (questions 3b and c)?  
-7.d. No confidence interval is given for the ICER (cell M64) can you explain why such a confidence interval is not informative by looking at the incremental CEA plane in column AA?  
+7.d. No confidence interval is given for the ICER, can you explain why such a confidence interval is not informative by looking at the incremental cost-effectiveness plane ?  
 7.e. Rerun the bootstrap procedure 3 times using different seed numbers. Do the results of the bootstrap analysis change substantially? What would we need to do to reduce this variation in outcomes?  
