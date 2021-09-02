@@ -157,5 +157,3 @@ kable(cbind("Total per cycle" = round(rowSums(m_hs_comp), 0),
       )
 
 ```
-
-# References

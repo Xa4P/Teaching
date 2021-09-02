@@ -160,8 +160,6 @@ for (i in 1:n_cycles){
 # Create a matrix to store the cohort simulation (`m_hs_int`)
 m_hs_int 
 
-
-
 # Define the start position of individuals (all in "well")
 m_hs_int[1,] 
 
@@ -206,7 +204,6 @@ n_t_ly_int <- sum(v_t_ly_int)
 # QALY's
 ## Determine the number of QALYs won by 1 individual during 1 cycle
 v_qaly_comp 
-
 v_qaly_int
 
 ## Determine the number of QALYs gained over the cycles (reward at the end of the cycle!)
@@ -239,7 +236,19 @@ n_t_c_comp
 n_t_c_int
 
 # Calculate undiscounted mean outcomes per individual
+pp_ly_comp # per person mean LY comp
+pp_ly_int
+
+pp_qaly_comp
+pp_qaly_int
+
+pp_costs_comp
+pp_costs_int
+
 ## incrementals and ICER
+inc_qaly # incremental QALYs
+in_costs
+ICER # per QALY gained
 
 #---------------------------------------#
 #### 6. Calculate discounted results ####
@@ -283,7 +292,19 @@ n_t_c_comp_d
 n_t_c_int_d
 
 # Mean calculate discounted outcomes per individual
+pp_ly_comp_d # per person discounted mean LY comp
+pp_ly_int_d
+
+pp_qaly_comp_d
+pp_qaly_int_d
+
+pp_costs_comp_d
+pp_costs_int_d
+
 ## incrementals and ICER
+inc_qaly_d # incremental QALYs
+in_costs_d
+ICER_d # per QALY gained
 
 #---------------------------------------------------------------#
 #### 7. Impact of changing the discount rates on the results ####
