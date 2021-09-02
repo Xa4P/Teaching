@@ -1,0 +1,50 @@
+---
+title: "Practical assignment health effects - Solutions"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Answers
+
+## Assignment 1 - SF-36 - tab
+
+- How do you feel about this result? Did you expect to score higher or lower? and why?  
+**Answer:** own interpretation  
+- Given these results, can you express your quality of life in a single numeric value?  
+**Answer:** No, because the results are provided for each domain separately. To translate these results to a single numeric value (a utility), a tariff should be used.  
+
+## Assignment 2 - QALY calculation  
+
+- Calculate the numbers of QALY gained by the person  
+**Answer:** The answer is 15 QALYs. The calculation behind this answer is 10 * 0.9 + 5 * 0.6 + 10 * 0.3. the graph below shows the correct answer as well.    
+
+```{r, fig.align = 'center', out.width = "90%", fig.cap = "Utility value of the person over time", echo = F}
+knitr::include_graphics("Assignment_2_solution.png")
+```
+
+
+## Assignment 3 - QALYs comparison  
+
+- Which intervention provides the most QALYs?  
+**Answer:** None  
+- Based on the total number of QALYs gained, which intervention would you prefer?  
+**Answer:** Based on the total number of QALY gained by each intervention, you should not have a preference because they provide the same number of QALYs (7 QALYs).  
+- What if the quality of life with intervention A was 0.8, which one would you then prefer?  
+**Answer:** If the quality of life with intervention A was increased to 0.8, then A would provide more QALYs, hence you should prefer it over B, when considering the total number of QALYs.   
+
+
+# Assignments 4, 6, and 7  
+**Answers:** Assignments 4, 6, and 7 concern all your own preference. There are no right or wrong answers.  
+
+# Assignment 5  
+
+**Answers:**  
+- EQ-5D-description first health state : 12423; utility value = 
+- EQ-5D-description second health state : 25431; utility value = 
+- EQ-5D-description third health state : 11122; utility value = 
+

@@ -21,18 +21,18 @@ The aim of this practical assignment is to perform a health economic analysis us
 
 # Instuctions
   
-1. Download the folder `Practical_Trial_based_CEA` from the Canvas page and save it on your computer
-2. Open the `Assingment.R` file  
+1. Download the folder `Practical_Trial_based_CEA` from the Canvas page and save it on your computer  
+2. Open the `Assingment_TB_CEA_start.R` file  
 3. Load the data for this assignment (`trial_based_CEA.RData`) using the `load()` function  
 4. When loaded, 8 objects (1 data frame, `df`, and 7 values) should appear in your environment  
 5. When performing the assignment, please document your code (using R markdown for instance)  
 6. Please keep your answers for the discussion  
-7. For this assignment, you are required to install the following packages: `tidyverse`
-`knitr`, `boot`.
 
 # Required packages
 
-- ...
+- `tidyverse`: for data manipulation and plotting    
+- `knitr`: for reporting, especially when using R markdown      
+- `boot`: for bootstrapping  
 
 # Objects
 ## `df`

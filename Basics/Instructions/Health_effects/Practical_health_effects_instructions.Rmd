@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 The overall aim of this assignment is to get you acquainted with measuring and valuing quality of life using different instruments. The assignment is implemented in a shiny app. 
 
 # Instructions
-Install the packages `shiny`, `diagram`, and `tidyverse` before running the app. Run the app using the `runGitHub` function from the `shiny` package as described below. To do so, you can download the file `Script_assignment_health_effects.R` from the Canvas page of this course or paste the below code in your R session. Answer the questions and keep these answers for the discussion.
+Install the packages `shiny`, `diagram`, and `tidyverse` before running the app. Run the app using the `runGitHub` function from the `shiny` package as described below. To do so, copy the following code in your own R session. Answer the questions and keep these answers for the discussion.
 
 ```{r, include = TRUE, eval = FALSE}
 # Set up

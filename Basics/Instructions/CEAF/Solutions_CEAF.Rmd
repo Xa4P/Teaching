@@ -19,7 +19,7 @@ df_thx <- readRDS("data_CEAF.rds") # Load data
 
 kable(df_thx) # Show data frame
 ```
-1. Create a cost-effectiveness plane for the outcomes of interventions 1-9  
+1. Look at the cost-effectiveness plane for the outcomes of strategies 1-9  
 ```{r, echo = TRUE}
 ggplot(data = df_thx, aes(x = QALYs, Costs, colour = Treatment)) +
   geom_point() + 

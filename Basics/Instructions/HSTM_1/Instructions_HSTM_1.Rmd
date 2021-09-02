@@ -22,7 +22,7 @@ The aim of this practical assignment is to get you acquainted with the principle
   
 1. Download the folder `Practical_HSTM_1` from the Canvas page and save it on your computer  
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
-2. Open the `Assignment_HSTM1_start.R` file and follow the instructions of this document or in the R file (these are the same). Use the model structure on the enxt page to perform the assignment.       
+2. Open the `Assignment_HSTM1_start.R` file and follow the instructions of this document or in the R file (these are the same). Use the model structure on the next page to perform the assignment.       
 3. During the completion of the assignment, answer the questions of this document    
 
 \newpage
@@ -46,7 +46,7 @@ knitr::include_graphics("Fig_model_structure.png")
 1.f. The probability that an individual with a new and untreated aneurysm (that remains untreated) develops an additional, new aneurysm, in 2 years’ time  
 1.g. The excess mortality risk (expressed as relative risk) of individuals with successfully treated aneurysms compared to healthy individuals  
 1.h. The risk of death from a car accident for an individual with a detected unruptured aneurysm  
-1.i. [OPTIONAL] The sensitivity of the (unknown) test used to detect aneurysms after 4 months/repetitions  
+1.i. [OPTIONAL] The sensitivity of the (unknown) test used to detect aneurysms after 4 months/repetitions after the aneurysm is present  
 1.j. [OPTIONAL] The probability that an individual with a new aneurysm dies before it is detected (you can give an approximation, or the exact value)  
 2. Creating a transition matrix.  
 2.a.	To evaluate the life course of individuals over a large number of time cycles we need a transition matrix. Create a transition matrix (called `m_tp`) containing 5 rows and 5 columns (using the matrix() function). Assign the value 0 to all cells of the matrix to start with. Name the rows and column (argument dimnames of the function): "Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment".  

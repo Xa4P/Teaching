@@ -7,14 +7,19 @@
 #--------------#
 rm(list  = ls()) # clear environment
 options(scipen = 999) # remove scientific notation
+#install.packages("rstudioapi") # if not already installed
+#install.packages("tidyverse") # for plotting, if not already installed
+
 library(rstudioapi)
-setwd(dirname(getActiveDocumentContext()$path)) 
+library(tidyverse)
+
+setwd(dirname(getActiveDocumentContext()$path)) # set working directory to current location
 
 df_thx <- readRDS("data_discount.rds") # Load data, CHANGE PATH ACCORDINGLY IF THE DATA DOES NOT LOAD AUTOMATICALLY!
 
-#-------------#
-#### Steps ####
-#-------------#
+#-------------------#
+#### Assignments ####
+#-------------------#
 
 
 # 1.  Define a new object `r_disc`, which is the discount rate that will be used in the current assignment, and set its value to `0.05` (meaning 5% discount annualy)

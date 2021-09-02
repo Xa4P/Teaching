@@ -57,6 +57,9 @@ kable(v_icer_undisc)
 v_disc <- 1/(1+r_disc)^df_thx$Year # create vector of discount weights
 kable(v_disc,
       digits = 3) # show
+plot(v_disc, type = 'l',
+     xlab = "Time (in years)",
+     ylab = "Discount weight")
 ```
 
 5. Apply discounting on the incremental effects and costs (by multiplying each column by the vector of discount weights fo instance) to convert these to their present value. Report the discounted effects and costs in new columns called Inc_cost_A_d, Inc_QALY_A_d, Inc_cost_B_d, Inc_QALY_B_d, Inc_cost_C_d, Inc_QALY_C_d.   

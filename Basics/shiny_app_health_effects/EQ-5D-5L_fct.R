@@ -24,12 +24,12 @@ estimate_utility <- function(mo = 1, sc = 1, ua = 1, pd = 1, ad = 1, tbl_decreme
   } else{
     
     constant <- tbl_decrements[which(tbl_decrements$Levels == "Constant"), "Decrements"] # Constant when deviating from full health
-    utility <- constant + 
-      ifelse(v_levels[1] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("mo", v_levels[1])), "Decrements"]) +
-      ifelse(v_levels[2] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("sc", v_levels[2])), "Decrements"]) +
-      ifelse(v_levels[3] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("ua", v_levels[3])), "Decrements"]) +
-      ifelse(v_levels[4] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("pd", v_levels[4])), "Decrements"]) +
-      ifelse(v_levels[5] == 1, 0, tbl_decrements[which(tbl_decrements$Levels == paste0("ad", v_levels[5])), "Decrements"]) # apply decrements
+    utility <- as.numeric(as.character(constant)) + 
+      ifelse(as.numeric(as.character(v_levels[1])) == 1, as.numeric(as.character("0")), as.numeric(as.character(tbl_decrements[which(tbl_decrements$Levels == paste0("mo", v_levels[1])), "Decrements"]))) +
+      ifelse(as.numeric(as.character(v_levels[2])) == 1, as.numeric(as.character("0")), as.numeric(as.character(tbl_decrements[which(tbl_decrements$Levels == paste0("sc", v_levels[2])), "Decrements"]))) +
+      ifelse(as.numeric(as.character(v_levels[3])) == 1, as.numeric(as.character("0")), as.numeric(as.character(tbl_decrements[which(tbl_decrements$Levels == paste0("ua", v_levels[3])), "Decrements"]))) +
+      ifelse(as.numeric(as.character(v_levels[4])) == 1, as.numeric(as.character("0")), as.numeric(as.character(tbl_decrements[which(tbl_decrements$Levels == paste0("pd", v_levels[4])), "Decrements"]))) +
+      ifelse(as.numeric(as.character(v_levels[5])) == 1, as.numeric(as.character("0")), as.numeric(as.character(tbl_decrements[which(tbl_decrements$Levels == paste0("ad", v_levels[5])), "Decrements"]))) # apply decrements
     
     res <- utility
     }
