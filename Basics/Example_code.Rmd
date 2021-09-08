@@ -1,0 +1,134 @@
+---
+title: "R code HSTM"
+author: "X. Pouwels"
+date: "8-9-2021"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+# DISCLAIMER: 
+**THIS CODE IS BASED ON THE TUTORIAL BY THE DARTH WORK GROUP:**  
+Alarid-Escudero F, Krijkamp EM,  Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. Cohort state-transition models in R: A tutorial. arXiv:2001.07824, 2020.  
+LINK: https://arxiv.org/abs/2001.07824
+
+# Difference equation
+```{r, echo = TRUE}
+rm(list = ls())
+# Set up
+v_names    <- c("PF", "PD", "D")     # state names
+n_states   <- length(v_names)        # number of states
+n_cycles   <- 30                     # number of cycles
+
+# Define parameters
+p_prog       <- 0.1  # probability to progress
+p_death_pf   <- 0.05 # probability to die from progression-free
+p_death_pd   <- 0.25 # probability to die from progressed 
+
+# Initialise matrix to store cohort simulation
+m_hs <- matrix(NA, nrow = n_cycles + 1, ncol = n_states, 
+               dimnames = list(0:n_cycles, v_names))   # create Markov trace
+
+m_hs[1, ] <- c(1000, 0, 0) # define starting position individuals
+
+# Fill in cohort simulation
+for (t in 1:n_cycles) {
+  m_hs[t + 1, "PF"] <-  m_hs[t, "PF"] * (1 - p_prog - p_death_pf)             # calculate the prop of cohort in PF state at time t + 1
+  m_hs[t + 1, "PD"] <-  m_hs[t, "PF"] * p_prog + m_hs[t, "PD"] * (1- p_death_pd)    # calculate the prop of cohort in PD state at time t + 1
+  m_hs[t + 1, "D"]  <-  m_hs[t, "PF"] * p_death_pf + m_hs[t, "PD"] * p_death_pd + m_hs[t, "D"]   # calculate the prop of cohort in D state at time t + 1
+} 
+
+# Visualise the results
+kable(head(m_hs),
+      caption = "Start cohort simulation")
+```
+
+\newpage
+
+# Matrix multiplication
+```{r, echo = TRUE}
+rm(list = ls())
+# Set up
+v_names    <- c("PF", "PD", "D")     # state names
+n_states   <- length(v_names)        # number of states
+n_cycles   <- 30                     # number of cycles
+
+# Define parameters
+p_prog       <- 0.1  # probability to progress
+p_death_pf   <- 0.05 # probability to die from progression-free
+p_death_pd   <- 0.25 # probability to die from progressed 
+
+# Define transition matrix
+m_p <- matrix(0, nrow = n_states, ncol = n_states, 
+              dimnames = list(v_names, v_names))
+
+m_p["PF", "PD"]  <- p_prog
+m_p["PF", "D"]   <- p_death_pf
+m_p["PF", "PF"]  <- 1 - p_prog - p_death_pf
+m_p["PD", "D"]   <- p_death_pd
+m_p["PD", "PD"]  <- 1 - p_death_pd
+m_p["D", "D"]    <- 1
+rowSums(m_p)
+
+# Initialise matrix to store cohort simulation
+m_hs <- matrix(NA, nrow = n_cycles + 1, ncol = n_states, 
+               dimnames = list(0:n_cycles, v_names))   # create Markov trace
+
+m_hs[1, ] <- c(1000, 0, 0) # define starting position individuals
+
+# Fill in cohort simulation
+for (t in 1:n_cycles) {
+  m_hs[t + 1, ] <-  m_hs[t, ] %*% m_p
+  } 
+
+# Visualise the results
+kable(head(m_hs),
+      caption = "Start cohort simulation")
+```
+
+# Array multiplication
+```{r, echo = TRUE}
+rm(list = ls())
+# Set up
+v_names    <- c("PF", "PD", "D")     # state names
+n_states   <- length(v_names)        # number of states
+n_cycles   <- 30                     # number of cycles
+
+# Define parameters
+p_prog         <- 0.1  # probability to progress
+v_r_death_pf   <- seq(from = 0.01, to = 0.07, length.out = n_cycles) # death rate from progression-free
+v_p_death_pf   <- 1 - exp(-v_r_death_pf) # probability to die from progression-free
+p_death_pd     <- 0.25 # probability to die from progressed 
+
+# Define transition matrix
+a_p <- array(0, 
+             dim = c(n_states, n_states, n_cycles),
+             dimnames = list(v_names, 
+                             v_names,
+                             1:n_cycles))
+
+a_p["PF", "PD", ]  <- p_prog
+a_p["PF", "D", ]   <- v_p_death_pf # use vector instead of "fixed" transition probability
+a_p["PF", "PF", ]  <- 1 - p_prog - v_p_death_pf
+a_p["PD", "D", ]   <- p_death_pd
+a_p["PD", "PD", ]  <- 1 - p_death_pd
+a_p["D", "D", ]    <- 1
+rowSums(a_p[, , 10])
+
+# Initialise matrix to store cohort simulation
+m_hs <- matrix(NA, nrow = n_cycles + 1, ncol = n_states, 
+               dimnames = list(0:n_cycles, v_names))   # create Markov trace
+
+m_hs[1, ] <- c(1000, 0, 0) # define starting position individuals
+
+# Fill in cohort simulation
+for (t in 1:n_cycles) {
+  m_hs[t + 1, ] <-  m_hs[t, ] %*% a_p[, ,t]
+} # loop over both the cohort simulation and the different matrices of the array
+
+# Visualise the results
+kable(head(m_hs),
+      caption = "Start cohort simulation")
+```
