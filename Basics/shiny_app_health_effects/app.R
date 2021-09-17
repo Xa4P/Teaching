@@ -773,9 +773,7 @@ social activities (like visiting friends, relatives, etc.)?"),
                     h4("How do you rate the quality of life in the above-described health state?"),
                     helpText("Please indicate this on the visual analog scale using the slider"),
                     sliderInput("vas_v1", "Quality of life between worst imaginable health state, and best imaginable health state", 
-                                min = 0, max = 1, value = 0.5, step = 0.01,
-                                pre = "The worst health you can imagine",
-                                post = "The best health you can imagine")
+                                min = 0, max = 1, value = 0.5, step = 0.01)
                     
              ),
              column(width = 8,
