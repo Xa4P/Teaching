@@ -1119,7 +1119,8 @@ server <- function(input, output) {
      plotmat(M, pos = c(1, 1, 3), name = v_names, lwd = 1,
              curve = 0,
              box.lwd = 2, cex.txt = 1.2, box.size = 0.05,
-             box.type = "square", box.prop = 0.5
+             box.type = "square", box.prop = 0.5,
+             shadow.size = 0
      )
      
    })
