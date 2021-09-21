@@ -1,0 +1,64 @@
+---
+title: "Practical assignment cost-effectiveness acceptability frontier"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(scipen = 999) # Disable scientific notations
+library(tidyverse)
+library(knitr)
+
+df_thx <- readRDS("data_CEAF.rds") # Load data
+```
+
+# Aim
+This assignment aims to familiarise you with the concept of the cost-effectiveness acceptability frontier (CEAF), by constructing one yourself, based on a fictive example. The aim of this assignment is to identify which of the following screening strategy is the most cost effective.      
+
+# Required package
+
+1. `rstudioapi`: for loading the data in case the working directory is not at the same location as the source file `Assignment_start_discounting.R` for performing the assignment  
+2. `tidyverse`: for plotting and data manipulation  
+
+# Instuctions
+  
+1. Download the `Assignment_start_CEAF.R` and `data_CEAF.rds` files from the Canvas page and save them in the same folder.  
+2. Open the `Assignment_start_CEAF.R` file. In this file, the instructions from below are copied and objects names are already define for you to perform the assignment and to structure your code.     
+3. Load the data for this assignment (`data_CEAF.rds`) using the readRDS() function, and assign it to an object called `df_thx`.  
+4. When performing the assignment, please document your code (using R markdown for instance)  
+5. Please keep your answers for the discussion  
+
+# `df_thx` object
+This object contains 4 variables and 9 observations (the strategies to compare):  
+
+- Treatment = the integer identifying the screening strategy  
+- Name = the name of the screening strategy  
+- Costs = the total costs of the screening strategy    
+- QALYs = the total QALYs gained through the screening strategy  
+
+\newpage
+# Assignment and questions  
+1. Look at the cost-effectiveness plane for the outcomes of strategies 1-9  
+```{r, echo = TRUE}
+ggplot(data = df_thx, aes(x = QALYs, Costs, colour = Treatment)) +
+  geom_point() + 
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey") +
+  ggtitle("Cost-effectiveness plane") +
+  theme_bw()
+``` 
+1.a. Question: based on this graph, can you already tell which strategy is (extendedly) dominated?  
+2. Calculate the fully incremental ICERs of these screening strategies against each other   
+2.a. *To do so, use the method described in the paper from Paulden (literature list). Using for loops may be required. If you need to perform multiple rounds to identify the strategies on the CEAF, you can discard the (extendedly) dominated strategies from the data frame between each step. You can also perform this exercise using pen, paper, and a calculator.*  
+3. Which strategies are dominated?  
+4. Which strategies are extendedly dominated?  
+5. Which strategies are on the cost-effectiveness acceptability frontier?  
+6. Which strategy is optimal if the WTP threshold is equal to €20,000/QALY?  
+7. Which strategy is optimal if the WTP threshold is equal to €40,000/QALY?  
+8. Which strategy is optimal if the WTP threshold is equal to €100,000/QALY?  
+9. At which WTP threshold would strategy 4 be the optimal strategy?  
+10. At which WTP threshold would strategy 7 be the optimal strategy?  
+11.	Calculate the Net Monetary Benefit (NMB) for each strategy for a WTP threshold of €20,000/QALY. Which strategy has the highest NMB? Does this correspond with your answer to question 6?  

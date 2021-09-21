@@ -1,0 +1,143 @@
+---
+title: "Practical assignment discounting - Solution"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyverse)
+```
+# Assignment and solutions 
+
+1. Define a new object `r_disc`, which is the discount rate that will be used in the current assignment, and set its value to `0.05` (meaning 5% discount annually)
+
+```{r, echo = TRUE}
+rm(list  = ls()) # clear environment
+df_thx <- readRDS("data_discount.rds") # Load data
+
+# Define discount rates
+r_disc <- 0.05
+
+# Show data frame
+kable(df_thx)
+```
+
+2. Calculate the total undiscounted incremental costs and effects for each intervention  
+
+```{r, echo = TRUE}
+v_res_undisc <- colSums(df_thx[, c(2:ncol(df_thx))]) # Calculate total undiscounted costs
+kable(v_res_undisc)
+```
+
+3. Calculate the **undiscounted** ICERS for each of these interventions using the total incremental costs and effects you calculated under step 2
+
+```{r, echo = TRUE}
+v_res_undisc <- unname(v_res_undisc) # remove names for clarity
+
+v_icer_undisc <- c(ICER_A = v_res_undisc[1]/v_res_undisc[2],
+                   ICER_B = v_res_undisc[3]/v_res_undisc[4],
+                   ICER_C = v_res_undisc[5]/v_res_undisc[6]
+) # calculate undiscounted ICERs
+
+kable(v_icer_undisc)
+```
+
+3.a. Question: what are the total incremental costs and effects for each intervention? Which intervention provides the highest **undiscounted** incremental costs and effects?   
+3.a. **Answer:** There are no differences concerning the UNDISCOUNTED incremental costs and effect between the different interventions.    
+3.b. Question: what are the ICERs for each intervention? Which intervention provides the best value for money (most favourable ICER) based on these **undiscounted** incremental costs and effects?  
+3.b. **Answer:** There are no differences concerning the UNDISCOUNTED ICERs costs and effect between the different interventions.  
+
+\newpage
+4. Create a vector of discount weights for Years 0 to 12.
+
+```{r, echo = TRUE}
+v_disc <- 1/(1+r_disc)^df_thx$Year # create vector of discount weights
+kable(v_disc,
+      digits = 3) # show
+plot(v_disc, type = 'l',
+     xlab = "Time (in years)",
+     ylab = "Discount weight")
+```
+
+5. Apply discounting on the incremental effects and costs (by multiplying each column by the vector of discount weights fo instance) to convert these to their present value. Report the discounted effects and costs in new columns called Inc_cost_A_d, Inc_QALY_A_d, Inc_cost_B_d, Inc_QALY_B_d, Inc_cost_C_d, Inc_QALY_C_d.   
+
+```{r, echo = TRUE}
+# Calculate discounted incremental effects and costs
+df_thx$Inc_cost_A_d <- df_thx$Inc_cost_A * v_disc
+df_thx$Inc_QALY_A_d <- df_thx$Inc_QALY_A * v_disc
+df_thx$Inc_cost_B_d <- df_thx$Inc_cost_B * v_disc
+df_thx$Inc_QALY_B_d <- df_thx$Inc_QALY_B * v_disc
+df_thx$Inc_cost_C_d <- df_thx$Inc_cost_C * v_disc
+df_thx$Inc_QALY_C_d <- df_thx$Inc_QALY_C * v_disc
+
+kable(df_thx[,c("Year", "Inc_cost_A", "Inc_QALY_A", 
+                "Inc_cost_A_d", "Inc_QALY_A_d")],
+      digits = 3) # show difference for intervention A
+```
+6. Calculate the total **discounted** incremental costs and effects, and ICERs for each intervention.  
+
+```{r, echo = T}
+v_res_disc <- colSums(df_thx[, c("Inc_cost_A_d", "Inc_QALY_A_d",
+                                 "Inc_cost_B_d", "Inc_QALY_B_d",
+                                 "Inc_cost_C_d", "Inc_QALY_C_d")]) # calculate totals - discounted
+kable(v_res_disc,
+      digits = 3)
+
+v_res_disc <- unname(v_res_disc)
+
+v_icer_disc <- c(ICER_A = v_res_disc[1]/v_res_disc[2],
+                   ICER_B = v_res_disc[3]/v_res_disc[4],
+                   ICER_C = v_res_disc[5]/v_res_disc[6]
+) # calculate discounted ICERs
+
+kable(v_icer_disc,
+      digits = 3)
+```
+
+6.a. Question: what are the total **discounted** incremental costs and effects for each intervention? Which intervention provides the highest **discounted** incremental costs and effects?  
+6.a. **Answer:** Discounted incremental costs of A and B are equal and remain higher than discounted incremental costs of C. Intervention A provides the highest discounted incremental effects followed by C and B.  
+6.b. Question: what are the **discounted** ICERs for each intervention? Which intervention provides the best value for money (most favourable ICER) based on these **discounted** incremental costs and effects?  
+6.b. **Answer:** The discounted ICER of intervention A is the lowest (best value for money), followed by C and then B.    
+6.c. Can you explain the difference between the results obtained under step 6 and steps 2 and 3?  
+6.c. **Answer:** All ICERs increase because the health effects of all interventions are more heavily discounted than the costs because the incremental effects occurs later in the future than the costs. Hence, their present value is more heavily discounted than the incremental costs, and the ICERs increase.  
+7. Now apply a discount rate of **10%**  and calculate the **discounted** incremental costs and effects, and ICERs for each intervention again. Which intervention provides the most and least value for money? Can you explain these results? Are these comparable with results obtained in step 6?  
+7. **Answer:** The effect observed under step 6 is only reinforced due to the higher yearly discount rate. Changing the discount rate does not change the order (in terms of ICER) of the interventions.  
+8. Can you explain why, even with a small discount rate (for example 0.1%) cost-effectiveness with discounting is always worse than cost-effectiveness without discounting?  
+8. **Answer:** For all three programmes, costs are incurred earlier (in earlier years) than health benefits are gained. Consequently, when future costs and future effects are discounted, the present value of health effects decreases more than the present value of costs. Given that health benefits are discounted more heavily than than costs, the cost-effectiveness deteriorates (the ICERs go up) whenever any discount rate >0 % is applied.  
+
+```{r, echo = T}
+r_disc_2 <- 0.10
+v_disc_2 <- 1/(1+r_disc_2)^df_thx$Year # create vector of discount rates
+v_res_disc10 <- apply(df_thx[, c("Inc_cost_A", "Inc_QALY_A",
+                                 "Inc_cost_B", "Inc_QALY_B",
+                                 "Inc_cost_C", "Inc_QALY_C")], 2, function(x) x %*% v_disc_2) # matrix multiplication of vector of costs and effects x vector dicsount rates
+v_icer_disc10 <- c(ICER_A = v_res_disc10[1]/v_res_disc10[2],
+                 ICER_B = v_res_disc10[3]/v_res_disc10[4],
+                 ICER_C = v_res_disc10[5]/v_res_disc10[6]
+) # calculate discounted ICERs, with 10% discount rate
+
+# Comparison all results
+m_res_total <- rbind(v_icer_undisc,
+                   v_icer_disc,
+                   v_icer_disc10)
+kable(rbind(v_res_undisc,
+        v_res_disc, 
+        v_res_disc10), 
+      caption = "Totals using the different discount rates",
+      digits = 3)
+
+kable(m_res_total, 
+      caption = "ICERs using the different discount rates",
+      digits = 3) #  show results
+
+df_res <- data.frame(cbind(Analysis = c("Undiscounted", "5% discount", "10% discount")),
+                     m_res_total)
+df_plot <- df_res %>% 
+    pivot_longer(c(ICER_A, ICER_B, ICER_C), names_to = "Intervention", values_to = "ICER")
+  
+ ggplot(data = df_plot, aes(x = Intervention, y = ICER, fill = Analysis)) +
+      geom_bar(stat = "identity", position = position_dodge())  + 
+      theme_bw()

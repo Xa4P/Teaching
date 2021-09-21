@@ -1,0 +1,55 @@
+---
+title: "Practical Health State Transition Model 2C"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: [references.bib]
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Aim
+This assignmment focuses on illustrating the working of a probabilistic analysis and how to interpret the results of a probabilistic analysis through the incremental cost-effectiveness (iCE) plane and the cost-effectiveness accepatbility curve (CEAC). The model structure is the same as the previous two assignments, and is provided on the next page.  
+The method described in this practical is more extensively described in @Alarid_Escudero_2020.  
+
+# Instuctions
+  
+1. This assignment can be performed entirely  through the R shiny app, please see below hoe to access it.
+2. Before performing the assignment, have a look at how the model structure looks like on the next page  
+3. During the completion of the assignment, answer the questions of this document    
+**DISCLAIMER: FOR THE FOLLOWING ASSIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
+
+\newpage
+# Model structure  
+In this HSTM, individuals either receive aspriring or not (the two strategies we compare). These individuals may remain "Well", or they can experience a stroke or a myocardial infarction (MI). These two events may be fatal or individuals may remain in the "Post-minor stroke", "Post-major stroke", or "Post-MI" health states if they survive these events. From all health states, individuals may die from general causes of death to "Death other".  
+```{r, fig.align = 'center', out.width = "90%", fig.cap = "Health state transition model structure", echo = F}
+knitr::include_graphics("Fig_model_structure.png")
+```
+
+\newpage
+# Instructions and questions
+1. Open the R Shingy app using the following command and go to the "Assignment HSTM 2C - inputs"-tab. Answer the following questions by modifying the model inputs when needed. The model behind the R shiny app has now been made probabilistic. On the "Assignment HSTM 2C - inputs"-tab you can see the mean, standard error, and distributions that were associated with each input parameter of the model.      
+```{r, echo = T, eval = F}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
+```
+1.a. You can see that a Beta distribution has been assigned to the parameter `p_post_major_stroke`.  Why is a Beta distribution appropriate?  
+1.b. Could we have used a Normal distribution? Explain your answer.  
+1.c. Could we have used a Uniform distribution? Explain your answer.  
+2. Perform the probabilistic analysis by pushing the button "Push to perform the Probabilistic Analysis!". Once your have pushed the button, the summary statistics of the probabilistic input parameters are computed and the first 100 sets of probabilistic parameters are shown.  In the "Assignment HSTM 2C - Results", you can see the summary statistic, incremental cost-effectiveness plane, and cost-effectiveness acceptability curve, which are based on the probabilistic results.  
+2.a.	Have a look at the cost-effectiveness plane. What is the range of the costs and QALYs for individuals not using aspirin? And what for those individuals using aspirin? Note that you can get the exact ranges in the summary table.  
+2.b.	Have a look at the incremental cost-effectiveness plane. Which quadrants are covered by the cloud of the simulations? What does this represent?  
+2.c.	Looking at the incremental cost-effectiveness plane, what do you think is the probability that the aspirin treatment strategy will be effective (QALYs will be gained)? Note that this is calculated right of the plane.    
+3.	Below, the cost-effectiveness acceptability curves are drawn for both strategies and the probability that each strategy is cost effective is provided in the table right from the figure.    
+3.a. What would you advise in case of a willingness to pay (WTP) of €10.000? And what would you advise in case of a WTP of €100.000?  
+3.b. What would you advise when the WTP would be €40,000? How sure are you about this advice?  
+4.	We saw that for some (ranges of) values of the WTP there may not be a very clear optimal strategy. This uncertainty may come from the inaccuracy in the evidence that was used in the model, that is, one or more parameters will have very wide distribution and therefore a large range of possible values.  
+4.a.	What would you advise in such a situation?  
+4.b.	Investigate what would happen if you would perform a study to be more sure about the treatment effect of aspirin on MI. In order to do this, change the standard error (in the "Assignment HSTM 2C - inputs"-tab) from 0.15 to 0.02 and rerun the probabilistic analysis by pushing the button. What has happened to the clouds in the CE and ICE plane? What would you conclude from the CEAC now?  
+4.c.	Cost-effectiveness results may be very different across subgroups. We have now looked at the results for a starting age of 45. Investigate the cost-effectiveness for aspirin use for hypothetical individuals with a starting age of 80 (by changing the starting age in the in the "Assignment HSTM 2C - inputs"-tab and re-running the analysis). What would your advice now be in case of a WTP of €10.000, €40.000, and €100.000?  
+
+**THIS IS THE END OF THE PRACTICAL**
+
+\newpage
+# References

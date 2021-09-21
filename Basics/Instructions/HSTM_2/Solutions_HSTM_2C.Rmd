@@ -1,0 +1,41 @@
+---
+title: "Practical Health State Transition Model 2C - Solutions"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: [references.bib]
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Questions and answers
+1. Open the R Shingy app using the following command and go to the "Assignment HSTM 2C - inputs"-tab. Answer the following questions by modifying the model inputs when needed. The model behind the R shiny app has now been made probabilistic. On the "Assignment HSTM 2C - inputs"-tab you can see the mean, standard error, and distributions that were associated with each input parameter of the model.      
+```{r, echo = T, eval = F}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
+```
+1.a. You can see that a Beta distribution has been assigned to the parameter `p_post_major_stroke`.  Why is a Beta distribution appropriate?  
+**Answer:** The beta distribution will be most appropriate as it is smooth, and its range does not include negative values, which is appropriate for probabilities.  
+1.b. Could we have used a Normal distribution? Explain your answer.  
+**Answer:** No. The normal distribution is easily interpretable, but the symmetry and infinite range are not always realistic. Here the normal distribution may result in negative values which are not valid for use as probabilities.  
+1.c. Could we have used a Uniform distribution? Explain your answer.  
+**Answer:** Yes, but a uniform distribution is useful in case you have very limited information, but only an idea of the range of values. However, as soon as you have evidence, equal probabilities will often not be a realistic scenario, that is, you know that some values are more likely than others. Also, this distribution is not continuous, and is based on minimum and maximum values which are quite unstable (they change when you would collect additional data).  
+2. Perform the probabilistic analysis by pushing the button ("Push to perform the Probabilistic Analysis!"). Once your have pushed the button, the summary statistics of the probabilistic input parameters are computed and the first 100 sets of probabilistic parameters are shown. In the "Assignment HSTM 2C - Results", you can see the summary statistic, incremental cost-effectiveness plane, and cost-effectiveness acceptability curve, which are based on the probabilistic results.  
+2.a.	Have a look at the cost-effectiveness plane. What is the range of the costs and QALYs for individuals not using aspirin? And what for those individuals using aspirin? Note that you can get the exact ranges in the summary table.  
+**Answer:** See app, your results may differ from each other if you changes the seed number and the number of iterations.  
+2.b.	Have a look at the incremental cost-effectiveness plane. Which quadrants are covered by the cloud of the simulations? What does this represent?  
+**Answer:** The cloud of results covers the northwest (incremental costs, but a loss of QALYs), northeast (gain in QALYs at incremental costs), and southeast quadrant (gain in QALYs while saving costs).  
+2.c.	Looking at the incremental cost-effectiveness plane, what do you think is the probability that the aspirin treatment strategy will be effective (QALYs will be gained)? Note that this is calculated right of the plane.   
+**Answer:** Approximately 90% of the iterations is located in the east quadrants, representing a gain in QALYs.  
+3.	Below, the cost-effectiveness acceptability curves are drawn for both strategies and the probability that each strategy is cost effective is provided in the table right from the figure.    
+3.a. What would you advise in case of a willingness to pay (WTP) of €10.000? And what would you advise in case of a WTP of €100.000?  
+**Answer:** At a WTP €10,000 the strategy of "No Aspirin" has the highest probability (~79%) of being cost-effective. At a WTP €100,000 the strategy of "Aspirin" has the highest probability (~75%) of being cost-effective.  
+3.b. What would you advise when the WTP would be €40,000? How sure are you about this advice?  
+**Answer:** At a WTP €40,000 the "Aspirin" strategy has the highest probability of being cost-effective. However, this probability is "only" ~58%, indicating that there is a ~42% chance that it is not cost-effective.  
+4.	We saw that for some (ranges of) values of the WTP there may not be a very clear optimal strategy. This uncertainty may come from the inaccuracy in the evidence that was used in the model, that is, one or more parameters will have very wide distribution and therefore a large range of possible values.  
+4.a.	What would you advise in such a situation?  
+**Answer:** Gain better (more accurate) evidence for instance in literature, by synthesizing evidence, or performing a trial.  
+4.b.	Investigate what would happen if you would perform a study to be more sure about the treatment effect of aspirin on MI. In order to do this, change the standard error (in the "Assignment HSTM 2C - inputs"-tab) from 0.15 to 0.02 and rerun the probabilistic analysis by pushing the button. What has happened to the clouds in the CE and ICE plane? What would you conclude from the CEAC now?  
+**Answer:** The clouds become somewhat more dense. The probability of "Aspirin being cost-effective becomes somewhat higher, it increases from ~58% to ~60%. This is still not a very high probability, indicating that the current uncertainty in the treatment effect of aspirin on MI does not translate into large uncertainty in our results/conclusion. It is likely that there are other parameters, also with large uncertainty and a wide distribution, that cause the uncertainty in our results.  
+4.c.	Cost-effectiveness results may be very different across subgroups. We have now looked at the results for a starting age of 45. Investigate the cost-effectiveness for aspirin use for hypothetical individuals with a starting age of 75 (reset the standard error for the effectiveness of aspirin, change the starting age in the in the "Assignment HSTM 2C - inputs"-tab and re-running the analysis). What would your advice now be in case of a WTP of €10.000, €40.000, and €100.000?  
+**Answer:** At a WTP of €10,000 the "No aspirin" strategy has the highest probability (~85%) of being cost-effective. At a WTP €100,000 the "Aspirin" strategy has the highest probability (~72%) of being cost-effective. At a WTP €40,000 the probabilities of each of the strategies being cost-effective is approximately equal.  

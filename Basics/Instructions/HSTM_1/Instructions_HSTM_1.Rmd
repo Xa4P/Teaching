@@ -1,0 +1,106 @@
+---
+title: "Practical Health State Transition Model"
+author: "X. Pouwels"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: [references.bib]
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo = FALSE, warnings = FALSE}
+rm(list  = ls()) # clear environment
+options(scipen = 999) # Disable scientific notations
+library(knitr)
+```
+
+# Aim
+The aim of this practical assignment is to get you acquainted with the principle of health state transition models (HSTM). To do so, you will define a transition matrix for a simple HSTM and explore how you can use it to define your HSTM. The example used in the practical focuses on evaluating the life course of patients at risk of developing intracranial aneurysms using a HSTM.  
+
+# Instuctions
+  
+1. Download the folder `Practical_HSTM_1` from the Canvas page and save it on your computer  
+2. Before performing the assignment, have a look at how the model structure looks like on the next page  
+2. Open the `Assignment_HSTM1_start.R` file and follow the instructions of this document or in the R file (these are the same). Use the model structure on the next page to perform the assignment.       
+3. During the completion of the assignment, answer the questions of this document    
+
+\newpage
+# Model structure
+This section provides an explaination of the health state transition model (HSTM) used in this practical assignment. The HSTM represents the disease progression and treatment of patients who may develop an aneurysm. All patients start in the "Healthy" health state. From there, they can die from other causes of disease than an aneurysm, or they can develop a new intracranial aneurysm.  If they develop an aneurysm, the aneurysm can be detected, or they can die. If the aneurism is detected, it is assumed that patients receive treatment. The treatment can either be succesful and the patients return to "Healthy", or the treatment can be fatal and patients die. When patients die (from any causes), they remain in that health state (this is an absorbing health state).  
+In this model, patients move as an homogeneous cohort, all individuals start in the "Healthy" health state, the time cycle in this model is 1 month, and costs and health effects are not  included in this simple model.  
+  
+```{r, fig.align = 'center', out.width = "90%", fig.cap = "Health state transition model structure", echo = F}
+knitr::include_graphics("Fig_model_structure.png")
+```
+
+\newpage
+# Questions
+
+1. Use the model parameters (the `p_[NAME] parameters`) defined in the `Assignment_HSTM1_start.R` and the model structure to calculate the following probabilities/quantities (subquestions a to j).  
+1.a. The probability that an individual dies from aneurysm treatment in month 2  
+1.b. The probability that an individual starts in the Healthy state and remains there, that is, survives and does not develop an aneurysm, in 1 year  
+1.c. The probability that an individual develops 2 aneurysms and is treated successfully twice, in 6 months’ time  
+1.d. The probability that an individual dies of other causes within the first month  
+1.e. The probability that an individual dies of other causes within the first 2 months  
+1.f. The probability that an individual with a new and untreated aneurysm (that remains untreated) develops an additional, new aneurysm, in 2 years’ time  
+1.g. The excess mortality risk (expressed as relative risk) of individuals with successfully treated aneurysms compared to healthy individuals  
+1.h. The risk of death from a car accident for an individual with a detected unruptured aneurysm  
+1.i. [OPTIONAL] The sensitivity of the (unknown) test used to detect aneurysms after 4 months/repetitions after the aneurysm is present  
+1.j. [OPTIONAL] The probability that an individual with a new aneurysm dies before it is detected (you can give an approximation, or the exact value)  
+2. Creating a transition matrix.  
+2.a.	To evaluate the life course of individuals over a large number of time cycles we need a transition matrix. Create a transition matrix (called `m_tp`) containing 5 rows and 5 columns (using the matrix() function). Assign the value 0 to all cells of the matrix to start with. Name the rows and column (argument dimnames of the function): "Healthy", "NewAneurysm",	"DetectedAneurysm", "DeathOther",	"DeathTreatment".  
+2.b. Fill the matrix with the values of the transition probabilities. The rows indicate the health state from which persons transit. The columns indicate the health state to which persons transit. You can use the names of the rows and columns to assign the transition probabilities to each cell. Do not forget to define the probability of remaining in a health state!  
+2.c. Check whether all rows sum up to one (using the rowSums() function for instance).  
+3. Open the R Shiny app 'cea' again using the following command, and select the tab "Assignment 3 - Transition matrix". Fill in the transition probabilities provided in the `Assignment_HSTM1_start.R` in the left panel. Check whether you correctly filled the transition matrix manually. The transition matrix after 1, 2, and 3 cycles will be automatically filled in. The last transition matrix (after N cycles), will be updated when you change the last input in the left panel. The resulting distribution of the health states (after 1, 2,3 and N cycles), given all patients start in the "Healthy"health state is also given in the tables titled "Health state distribution after 1, 2, 3, N cycles". Answer the following questions using this information, and by adapting the number of cycles when needed. You can also change the proportion of individuals starting in each health state (probabilities and proportions should be written in decimals, example: 20% should be 0.2).      
+
+```{r, echo = T, eval = F}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
+```
+3.a. What is the probability that an individual is healthy after exactly 1 year?  
+3.b. Compare the answer of 1.b. with your answer to 3.a. why is the latter probability larger?  
+3.c. How many months does it take until 60% of all individuals have died?  
+3.d. What percentage of all individuals is still alive after 2 years?  
+3.e. How much more likely are individuals to die from other causes than from aneurysm treatment? Hint: this only becomes apparent when all individuals have died.  
+3.f. Change the starting distribution of the model (using the input fields) to reflect 50% individuals starting in the "New Aneurysm" state and 50% starting in the "Detected Aneurysm" state. How does this change the probability of an individual being healthy after exactly 1 year? Compare your answer to the answer of question 3.a.  
+3.g. Why doesn’t the distribution of individuals over the health states change when you apply a time horizon of 7 years instead of 6 years?  
+
+4. Re-open your `Assignment_HSTM1_start.R` file to perform the cohort simulation.    
+This part of the assignment focuses on modelling the disease progression of individuals through the cohort simulation using the matrix (`m_tp`) you just defined. The method used to perform these calculations are described extensively in @Alarid_Escudero_2020.  
+4.a. (Re)define (or re-use) `m_tp` as in the previous assignment using the transition probabilities.  
+4.b. To evaluate the progression of individuals over multiple cycle, define the following objects:  
+- `n_cycles`: the number of cycles to simulate, assume 3 years (monthly cycles)  
+- `n_pt`: the number of individuals to simulate, assume 10,000  
+- `m_hs`: a matrix to store the number of individuals in each health state during each cycle. This matrix has `n_cycles` + 1 row (because we need to account for the start position), and as much columns as health states (5). Numerate the rows from 0 to `n_cycles` and name the column with the names of the health states ("Healthy", "NewAneurysm", "DetectedAneurysm", "DeathOther", "DeathTreatment"). Fill this matrix with 0's.    
+- `v_start_hs`: a vector determining the starting position of the individuals over the different cycles (assume all individuals start in the "Healthy" health state)  
+Once you have determined these parameters, use `v_start_hs` to determine the starting position of the individuals in the simulation.  
+Afterwards, perform the matrix multiplication to determine the health state membership of all individuals over the cycles. To determine the number of individuals in each health state during each cycle, one need to multiply the vector of state membership in the previous cycle (so, the previous row in `m_hs`) by the transition matrix (`m_tp`).  
+Example: to calculate the number of individuals in each health state in cycle 1, multiply the state membership in cycle 0, `m_hs[1, ]` (cycle 0 is row 1 because there is no row 0 in R), by the transition matrix, `m_tp`.
+*HINT:* to do these calculation automatically, use a a for loop over rows 1 to `n_cycles` of the `m_hs` matrix.  
+4.c. Use your cohort simulation to calculate the number of individuals being alive after exactly 3 years. Remember that individuals only remain alive if they are in one of the three health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”.  
+4.d. Use your cohort simulation to calculate the cumulative number of person-months that is spent in the health states “Healthy” , “ NewAneurysm”  and “ Detected Aneurysm”. Assume that we count state membership at the beginning of the cycles.  
+*HINT:* Use the cumsum() function  
+4.e. Can you determine the average number of months that individuals in this model are alive, over the 3 year time horizon?  
+*Hint:* you know the cohort size (10,000).  
+4.f. If you decrease the value of the parameter “pDeathOther” by 50%, that is, enter the value 0.05 for parameter “p_DeathOther” and increase the value of the parameter “p_TreatmentIsFatal” by 50%, that is, enter the value 0.40 for parameter “p_TreatmentIsFatal”. How do you think these changes will affect the average number of months that individuals in this model are alive?  
+*HINT:* To do so, you need to redefine the transition matrix, modify these two probabilities, and reiterate the cohort simulation.  
+4.g. Reset the parameters p_DeathOther to value 0.1 and p_TreatmentIsFatal to value 0.2.  What do you think will happen if we increase the sensitivity of the test to detect new aneurysms, from looking at the model structure? Change the value of the parameter “p_AneurysmDetection” from 0.50 to 0.80 and determine again the average number of months that individuals in this model are alive, after 3 years. Can you explain the result?  
+*HINT:* To do so, you need to redefine the transition matrix, modify these two probabilities, and reiterate the cohort simulation.  
+
+**To answer questions 4,f. and 4.g., you either perform the assignment manually, or you can make use of the tab "Assignment 3 - Cohort simulation" of the R Shiny application, which can be accessed using the following command.**  
+```{r, echo = T, eval = F}
+runGitHub("Teaching", "Xa4P", subdir = "Basics/shiny_app_cea/", ref = "main")
+```
+
+4.h. Think of different extensions/adaptations that would make this model more realistic  
+4.h.1.	Do you think the time cycle of 1 month is appropriate for this analysis?  
+4.h.2.	Can you think of a health state that might be added?  
+4.h.3.	Can you think of a transition that might be added?  
+4.h.4.	What is missing in this model to do a cost-effectiveness analysis?  
+4.h.5.	What is missing in this model to do a probabilistic sensitivity analysis?  
+
+You have now listed a number of improvements and extensions to this model, so apparently this model is a bit too simple to be of much value. Therefore, you will develop your own, much better model during the next exercises!  
+
+**This is the end of practical modelling 1!**
+
+# Reference
