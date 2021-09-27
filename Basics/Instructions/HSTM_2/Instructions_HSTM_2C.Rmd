@@ -16,7 +16,7 @@ The method described in this practical is more extensively described in @Alarid_
 
 # Instuctions
   
-1. This assignment can be performed entirely  through the R shiny app, please see below hoe to access it.
+1. This assignment can be performed entirely  through the R shiny app, please see below how to access it.
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
 3. During the completion of the assignment, answer the questions of this document    
 **DISCLAIMER: FOR THE FOLLOWING ASSIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
