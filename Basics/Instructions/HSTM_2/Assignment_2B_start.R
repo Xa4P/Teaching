@@ -30,13 +30,13 @@ r_inc_mi <- 400 / 100000 # yearly incidence rate MI
 r_inc_stroke <- 50 / 100000 # yearly incidence rate stroke
 r_mort <- 650 / 100000 # yearly rate of death
 
-r_mort_age_dependent <-  0.95^(c(115:20)-19) # mortality rate (age dependent)
+r_mort_age_dependent <-  0.95^(c(115:20) - 19) # mortality rate (age dependent)
 # Determine mortality probability for each age
 df_mort <- data.frame(cbind(age = c(20:115),
                             p_mort = 1 - exp(-r_mort_age_dependent)
 )
 )
-df_mort[nrow(df_mort), 2] <- 1 # Assumption that everybody dies at 
+df_mort[nrow(df_mort), 2] <- 1 # Assumption that everybody dies at age 115
 #plot(df_mort[, 1], df_mort[,2], type = 'l')
 
 ## Treatment effectiveness
@@ -56,7 +56,7 @@ c_post_mi	<- 8000 # yearly costs after having experienced a NON-FATAL MI
 c_post_minor_stroke	<- 2000 # yearly costs after having experienced a NON-FATAL minor stroke
 c_post_major_stroke	<- 20000 # yearly costs after having experienced a NON_FATAL major stroke
 
-# PARAMETERS TO CALCULATE YOURSELF!
+# Parameters which needed to be calculated in the previous assignment
 p_post_major_stroke	<- 235 / 1000 # probability to transit to "Post-major stroke" after a NON-FATAL stroke occured
 p_post_minor_stroke	<- 1 - p_post_major_stroke # probability to transit to "Post-minor stroke" after a NON-FATAL stroke occured
 

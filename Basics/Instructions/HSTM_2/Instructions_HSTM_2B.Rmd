@@ -18,8 +18,7 @@ The method described in this practical is more extensively described in @Alarid_
   
 1. Download the folder `Practical_HSTM_2` from the Canvas page and save it on your computer  
 2. Before performing the assignment, have a look at how the model structure looks like on the next page  
-2. Open the `Assignment_2B_start.R` file and follow the instructions of this document and in the R file. Use the model structure on the next page to perform the assignment. 
-3. Start the assignment by loading the inputs for the model from the `data_HSTM_2B.RData` file. The model inputs are the same as in the previous assignment.    
+3. Open the `Assignment_2B_start.R` file and follow the instructions of the current document and in the R file. Use the model structure on the next page to perform the assignment. 
 4. During the completion of the assignment, answer the questions of this document    
 **DISCLAIMER: FOR THE FOLLOWING ASSIGNMENT, ASSUME THAT PROBABILITIES ARE THE SAME AS RATES. SEE @Fleurence_2007 FOR AN EXPLANATION OF THE DIFFERENCES BETWEEN RATES AND PROBABILITIES AND REMEMBER THAT WE USUALLY USE PROBABILITIES IN HEALTH ECONOMIC MODELLING**  
 
