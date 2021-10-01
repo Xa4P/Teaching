@@ -1,0 +1,479 @@
+---
+title: "Code_optimisation_example"
+author: "X. Pouwels"
+date: "01-10-2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up
+```{r, echo = T}
+# Set up
+rm(list = ls())
+library("microbenchmark")
+library("profvis")
+library("compiler")
+library("foreach")
+library("doParallel")
+options(scipen = 999)
+set.seed(123)
+```
+# Aim
+Show examples of how to optimise one's code using a simple data set and simple function.
+
+```{r, echo = T}
+# Create data set and input parameter list
+n_pt <- 10000 # number of individuals
+
+df_pt  <- data.frame(
+  Gender = round(runif(n_pt)),
+  Age = round(runif(n_pt, min = 50, max = 75)),
+  Alive = 1,
+  QALY = 1
+) # data frame with individuals' characteristics, Gender: 0 = mam, 1 = woman
+#head(df_pt)
+
+l_inputs <- list(
+  p_death_50_men = 0.1,
+  p_death_60_men = 0.15,
+  p_death_70_men = 0.25,
+  p_death_50_women = 0.09,
+  p_death_60_women = 0.12,
+  p_death_70_women = 0.23,
+  u_50_men = 0.8,
+  u_60_men = 0.75,
+  u_70_men = 0.74,
+  u_50_women = 0.81,
+  u_60_women = 0.78,
+  u_70_women = 0.72
+) # list probability of death per age and gender
+m_pt <- as.matrix(df_pt) # create matrix out of data.frame
+```
+
+# Original function
+The following functions, `determine_death_1` aims at determining whether individuals are dying or remaining alive based on gender- and age-specific probability of death. This function is composed of a `for loop`. Each iteration of the loop is a single individuals. For each individuals, it is checked whether a random number is smaller or equal to the gender- and age-dependent probability (based on the individual's gender and age). If the random number is smaller or equal to that probability, the person is assumed to die (`Alive` variable becomes 0 otherwise it remains as it was). Let's agree this is a bad function, but a nice way to illustrate how a function can be improved.     
+```{r, echo = T}
+determine_death_1 <- function(df_pt_fct, l_inputs_fct) {
+  
+  for (i in 1:nrow(df_pt_fct)) {
+    df_pt_fct[i, "Alive"] <- ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_men, 0, 
+                                    ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_men, 0,
+                                           ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_men, 0,
+                                                  ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_women, 0, 
+                                                         ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_women, 0,
+                                                                ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_women, 0, 
+                                                                       df_pt_fct[i, "Alive"]
+                                                                       )
+                                                         )
+                                                  )
+                                           )
+                                    )
+    )
+    
+  }
+  
+  return(df_pt_fct)
+}
+```
+
+# Improvement 1: declaring objects
+The first step in speeding up your code can be achieved by declaring objects you will use in your function. In this example, we first declare the vector in which the "Alive" and "Dead" status of individuals is stored (the `v_death` object). This could also be achieved with the following command `vector(length = nrow(df_pt_fct))`, and can be done for any type of objects (`matrix`, `data.frame()`, `list()`, ...).   
+```{r, echo = T}
+
+determine_death_2 <- function(df_pt_fct, l_inputs_fct) {
+  
+  v_death <- c() # declare object
+  
+  for (i in 1:nrow(df_pt_fct)) {
+    v_death[i] <- ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_men, 0, 
+                                    ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_men, 0,
+                                           ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_men, 0,
+                                                  ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_women, 0, 
+                                                         ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_women, 0,
+                                                                ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_women, 0, 
+                                                                       df_pt_fct[i, "Alive"]
+                                                                )
+                                                         )
+                                                  )
+                                           )
+                                    )
+    )
+    
+  }
+  df_pt_fct[, "Alive"] <- v_death
+  
+  return(df_pt_fct)
+}
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+microbenchmark(determine_death_1(df_pt_fct = df_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_2(df_pt_fct = df_pt, 
+                                 l_inputs_fct = l_inputs),
+               times = 100)
+```
+
+# Improvement 2: use matrices
+An easy step to improve code efficiency is to use matrices instead of data.frames. A reason is that matrices are more memory efficient (store as vectors instead of lists). However, data.frames handle categorical variables more easily than matrices. Hence, coercing data.frames to matrices is recommended when all data is of the same type. For an extensive discussion of the differences between data.frames and matrices see [this link](https://stackoverflow.com/questions/5158790/should-i-use-a-data-frame-or-a-matrix).  
+```{r, echo = T}
+# Option 1: coerce data.frame to matrix
+determine_death_2b <- function(df_pt_fct, l_inputs_fct) {
+  
+  v_death <- c()
+  df_pt_fct <- as.matrix(df_pt_fct) # coercion to matrix
+  
+  for (i in 1:nrow(df_pt_fct)) {
+  v_death[i] <- ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_men, 0, 
+                                    ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_men, 0,
+                                           ifelse(df_pt_fct[i, "Gender"] == 0 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_men, 0,
+                                                  ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_women, 0, 
+                                                         ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 60 & df_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_women, 0,
+                                                                ifelse(df_pt_fct[i, "Gender"] == 1 & df_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_women, 0, 
+                                                                       df_pt_fct[i, "Alive"]
+                                                                )
+                                                         )
+                                                  )
+                                           )
+                                    )
+    )
+    
+  }
+  df_pt_fct[, "Alive"] <- v_death
+  df_pt_fct <- as.data.frame(df_pt_fct) # recoercion to data.frame
+  
+  return(df_pt_fct)
+}
+
+# Option 2: Change inputs function as matrix
+determine_death_3 <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_death <- c()
+  
+  for (i in 1:nrow(m_pt_fct)) {
+    v_death[i] <- ifelse(m_pt_fct[i, "Gender"] == 0 & m_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_men, 0, 
+                                    ifelse(m_pt_fct[i, "Gender"] == 0 & m_pt_fct[i, "Age"] >= 60 & m_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_men, 0,
+                                           ifelse(m_pt_fct[i, "Gender"] == 0 & m_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_men, 0,
+                                                  ifelse(m_pt_fct[i, "Gender"] == 1 & m_pt_fct[i, "Age"] < 60 & runif(1) <= l_inputs_fct$p_death_50_women, 0, 
+                                                         ifelse(m_pt_fct[i, "Gender"] == 1 & m_pt_fct[i, "Age"] >= 60 & m_pt_fct[i, "Age"] < 70 & runif(1) <= l_inputs_fct$p_death_60_women, 0,
+                                                                ifelse(m_pt_fct[i, "Gender"] == 1 & m_pt_fct[i, "Age"] >= 70 & runif(1) <= l_inputs_fct$p_death_70_women, 0, 
+                                                                       m_pt_fct[i, "Alive"]
+                                                                )
+                                                         )
+                                                  )
+                                           )
+                                    )
+    )
+    
+  }
+  m_pt_fct[, "Alive"] <- v_death
+
+  return(m_pt_fct)
+}
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+# Difference between using dataframes and matrices
+microbenchmark(determine_death_2(df_pt_fct = df_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_2b(df_pt_fct = df_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_3(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               times = 100)
+```
+
+# Improvement 3: vectorise
+Another way to improve computational efficiency is to vectorise your code, which means that you make use of vectors as much as possible. In this case, we first avoid looping by defining the random number for each individual (`runif()`) before determining whether these individuals die.
+```{r, echo = T}
+determine_death_4 <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_rand <- runif(nrow(m_pt_fct))
+  v_death <- vector()
+  
+  v_death <- ifelse(m_pt_fct[, "Gender"] == 0 & m_pt_fct[, "Age"] < 60 & v_rand <= l_inputs_fct$p_death_50_men, 0, 
+                                   ifelse(m_pt_fct[, "Gender"] == 0 & m_pt_fct[, "Age"] >= 60 & m_pt_fct[, "Age"] < 70 & v_rand <= l_inputs_fct$p_death_60_men, 0,
+                                          ifelse(m_pt_fct[, "Gender"] == 0 & m_pt_fct[, "Age"] >= 70 & v_rand <= l_inputs_fct$p_death_70_men, 0,
+                                                 ifelse(m_pt_fct[, "Gender"] == 1 & m_pt_fct[, "Age"] < 60 & v_rand <= l_inputs_fct$p_death_50_women, 0, 
+                                                        ifelse(m_pt_fct[, "Gender"] == 1 & m_pt_fct[, "Age"] >= 60 & m_pt_fct[, "Age"] < 70 & v_rand <= l_inputs_fct$p_death_60_women, 0,
+                                                               ifelse(m_pt_fct[, "Gender"] == 1 & m_pt_fct[, "Age"] >= 70 & v_rand <= l_inputs_fct$p_death_70_women, 0, 
+                                                                      m_pt_fct[, "Alive"]
+                                                               )
+                                                        )
+                                                 )
+                                          )
+                                   )
+    )
+  
+  m_pt_fct[, "Alive"] <- v_death
+  
+  return(m_pt_fct)
+}
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+microbenchmark(determine_death_3(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_4(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               times = 100)
+```
+
+# Improvement 4: use `match` and `findInterval` functions for categorical variables
+When using categorical variables, it is also recommended to use the R-base functions `match` and `findInterval` to improve code efficiency. These are vectorised functions respectively aiming at matching values from two vectors and matching values from a vector to intervals defined in another vector. In this example, the `m_p` matrix is defined at the start of the function. This matrix contains three variables: `Age` = the age categories for which the probabilities of death are defined, `Men` = probabilities of death for each age category in men, and `Women` = probabilities of death for each age category in women. In the following version of the function, the `findInterval` function is used to determine the age category (the row number in the `m_p` matrix) of each individuals in order to retrieve the corresponding probability of death.  
+```{r, echo = T}
+determine_death_5 <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_rand <- runif(nrow(m_pt_fct))
+  v_death <- vector()
+  
+  m_p <- matrix(c(50, 60, 70,
+                  l_inputs_fct$p_death_50_men, l_inputs_fct$p_death_60_men, l_inputs_fct$p_death_70_men,
+                  l_inputs_fct$p_death_50_women, l_inputs_fct$p_death_60_women, l_inputs_fct$p_death_70_women),
+                nrow = 3,
+                ncol = 3,
+                dimnames = list(NULL,
+                                c("Age", "Men", "Women"))
+  )
+  
+  v_death <- ifelse(m_pt_fct[, "Gender"] == 0 & v_rand <= m_p[findInterval(m_pt_fct[,"Age"], m_p[, "Age"]), "Men"], 0, 
+                    ifelse(m_pt_fct[, "Gender"] == 1 & v_rand <= m_p[findInterval(m_pt_fct[,"Age"], m_p[, "Age"]), "Women"], 0,
+                           m_pt_fct[, "Alive"]
+                           )
+                    )
+  
+  m_pt_fct[, "Alive"] <- v_death
+  
+  return(m_pt_fct)
+}
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+microbenchmark(determine_death_4(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_5(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               times = 100)
+```
+
+# Improvement 5: use "R logic" to vectorise further
+The next step in vectorising your code is to use the "R logic"
+```{r, echo = TRUE}
+determine_death_6 <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_rand <- runif(nrow(m_pt_fct))
+  v_death <- vector()
+  v_age_cat <- c(50, 60, 70)
+  v_p <- c(l_inputs_fct$p_death_50_men, l_inputs_fct$p_death_60_men, l_inputs_fct$p_death_70_men,
+                l_inputs_fct$p_death_50_women, l_inputs_fct$p_death_60_women, l_inputs_fct$p_death_70_women)
+  
+  v_death <- ifelse(v_rand <= v_p[findInterval(m_pt_fct[,"Age"], v_age_cat) + m_pt_fct[, "Gender"] * 3], 0, m_pt_fct[, "Alive"])
+  
+  m_pt_fct[, "Alive"] <- v_death
+  
+  return(m_pt_fct)
+}
+
+determine_death_7 <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_rand <- runif(nrow(m_pt_fct))
+  v_age_cat <- c(50, 60, 70)
+  v_p <- c(l_inputs_fct$p_death_50_men, l_inputs_fct$p_death_60_men, l_inputs_fct$p_death_70_men,
+           l_inputs_fct$p_death_50_women, l_inputs_fct$p_death_60_women, l_inputs_fct$p_death_70_women)
+  v_p_ind <- v_p[findInterval(m_pt_fct[,"Age"], v_age_cat) + m_pt_fct[, "Gender"] * 3]
+  
+  m_pt_fct[v_rand <= v_p_ind, "Alive"] <- 0
+  
+  return(m_pt_fct)
+}
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+microbenchmark(determine_death_5(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_6(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               determine_death_7(m_pt_fct = m_pt, 
+                                 l_inputs_fct = l_inputs),
+               times = 100)
+```
+
+# Potential immprovement: code compiling
+```{r, echo = TRUE}
+determine_death_compiled <- cmpfun(determine_death_1)
+```
+
+## Run-time comparison
+```{r, echo =  TRUE}
+microbenchmark(determine_death_1(df_pt,
+                                 l_inputs),
+               determine_death_compiled(df_pt,
+                                        l_inputs))
+```
+
+# Second example: Probabilistic analysis (Monte-Carlo) using a simple simulation model
+```{r, echo = TRUE}
+# Function to determine utility of individuals, based on age and gender
+determine_utility <- function(m_pt_fct, 
+                              l_inputs_fct) {
+  
+  v_u <- vector()
+  
+  for (i in 1:nrow(m_pt_fct)) {
+    
+    v_u[i] <- if(m_pt_fct[i, "Age"] < 60 & m_pt_fct[i, "Gender"]  == 0){
+        l_inputs_fct$u_50_men
+    } else if (m_pt_fct[i, "Age"] >= 60 & m_pt_fct[i, "Age"] < 70 & m_pt_fct[i, "Gender"]  == 0) {
+      l_inputs_fct$u_60_men
+      } else if (m_pt_fct[i, "Age"] >= 70 & m_pt_fct[i, "Gender"]  == 0) {
+      l_inputs_fct$u_70_men
+      } else if(m_pt_fct[i, "Age"] < 60 & m_pt_fct[i, "Gender"]  == 1){
+        l_inputs_fct$u_50_women
+      } else if (m_pt_fct[i, "Age"] >= 60 & m_pt_fct[i, "Age"] < 70 & m_pt_fct[i, "Gender"]  == 1) {
+        l_inputs_fct$u_60_women
+      } else {
+        l_inputs_fct$u_70_women
+      }
+  }
+  
+  m_pt_fct[, "QALY"] <- v_u
+  
+  return(m_pt_fct)
+  
+}
+
+# Updated function to take into account that individuals who are dead remain dead
+determine_death <- function(m_pt_fct, l_inputs_fct) {
+  
+  v_rand <- runif(nrow(m_pt_fct))
+  v_age_cat <- c(50, 60, 70)
+  v_alive <- m_pt_fct[, "Alive"]
+  
+  v_p <- c(l_inputs_fct$p_death_50_men, l_inputs_fct$p_death_60_men, l_inputs_fct$p_death_70_men,
+           l_inputs_fct$p_death_50_women, l_inputs_fct$p_death_60_women, l_inputs_fct$p_death_70_women)
+  v_p_ind <- v_p[findInterval(m_pt_fct[,"Age"], v_age_cat) + m_pt_fct[, "Gender"] * 3]
+  
+  m_pt_fct[v_rand <= v_p_ind, "Alive"] <- 0
+  m_pt_fct[v_alive == 0, "Alive"] <- 0 # ensures that individuals who were already dead remains dead
+  
+  return(m_pt_fct)
+}
+
+# Simulation function containing both functions and update of individuals' age after each cycle
+## Outcome of the simulation: number of dead individuals and total QALYs
+perform_simulation <- function(m_pt_sim, 
+                               l_inputs_sim) {
+  
+  n_cycles <- 10
+  m_res <- matrix(0,
+                  nrow = n_cycles,
+                  ncol = 2,
+                  dimnames = list(c(1:10),
+                                  c("n_death", "n_qalys")))
+  for (t in 1:n_cycles) {
+    m_pt_sim <- determine_death(m_pt_fct = m_pt_sim,
+                                   l_inputs_fct = l_inputs_sim)
+    m_pt_sim <- determine_utility(m_pt_fct = m_pt_sim, 
+                                  l_inputs_fct = l_inputs_sim)
+    
+    m_res[t, "n_death"] <- length(which(m_pt_sim[, "Alive"] == 0))
+    m_res[t, "n_qalys"] <- sum(m_pt_sim[, "Alive"] * m_pt_sim[, "QALY"])
+    
+    m_pt_sim[which(m_pt_sim[,"Alive"] == 1), "Age"]  <- m_pt_sim[which(m_pt_sim[,"Alive"] == 1), "Age"] + 1
+  }
+  
+  return(m_res)
+  
+}
+```
+
+# Probabilistic analyses using parallel computing 
+
+## Determine probabilistic parameters
+```{r, echo = TRUE} 
+# Determine probabilistic model inputs
+set.seed(444)
+n_it <- 1000
+
+df_inputs_probs <- data.frame(
+  u_50_men = rbeta(n_it, l_inputs$u_50_men, l_inputs$u_50_men * 0.25),
+  u_60_men = rbeta(n_it, l_inputs$u_60_men, l_inputs$u_60_men * 0.25),
+  u_70_men = rbeta(n_it, l_inputs$u_70_men, l_inputs$u_70_men * 0.25),
+  u_50_women = rbeta(n_it, l_inputs$u_50_women, l_inputs$u_50_women * 0.25),
+  u_60_women = rbeta(n_it, l_inputs$u_60_women, l_inputs$u_60_women * 0.25),
+  u_70_women = rbeta(n_it, l_inputs$u_70_women, l_inputs$u_70_women * 0.25)
+)
+
+# Function to update parameters (REF darthpack), used to update probabilistic parameters
+update_param_list <- function(l_params_all, params_updated){
+  
+  if (typeof(params_updated)!="list"){
+    params_updated <- split(unname(params_updated), names(params_updated)) # convert the named vector to a list
+  }
+  
+  l_params_all <- modifyList(l_params_all, params_updated) # update the values
+  
+  return(l_params_all)
+}
+```
+
+# Comparing running times
+```{r, echo = TRUE}
+m_results <- m_results_parallel <- matrix(0,
+                                          nrow = n_it,
+                                          ncol = 2, 
+                                          dimnames = list(NULL,
+                                                          c("n_death", "n_qalys"))) # matrices to store probabilistic results
+
+# PA not parallel
+t_start_loop <-  Sys.time()  
+set.seed(100)
+for (it_num in 1:n_it){
+  l_inputs_tmp <- update_param_list(l_inputs, df_inputs_probs[it_num, ])
+  
+  res_temp <- perform_simulation(m_pt_sim = m_pt,
+                                 l_inputs_sim = l_inputs_tmp)
+  
+  m_results[it_num, ] <- c(res_temp[nrow(res_temp), 1], sum(res_temp[, 2]))
+}
+t_end_loop <-  Sys.time() 
+diff_loop <- t_end_loop - t_start_loop
+
+# PA parallel
+t_start_parallel <-  Sys.time() 
+
+cores = detectCores()
+cl <- makeCluster(cores[1]-1) # Use all cores expect 1, not to overload your computer
+
+registerDoParallel(cl)
+set.seed(100)
+m_results_parallel <- foreach(j = 1:n_it, .combine = rbind) %dopar% {
+  # through rbind command: results are binded as rows
+  
+  l_inputs_tmp <- update_param_list(l_inputs, df_inputs_probs[j, ])
+  
+  res_temp <- perform_simulation(m_pt_sim = m_pt,
+                                 l_inputs_sim = l_inputs_tmp)
+  
+  v_res <- c(res_temp[nrow(res_temp), 1], sum(res_temp[, 2]))
+  
+  v_res
+}
+stopCluster(cl)
+t_end_parallel <-  Sys.time() 
+diff_parallel <- t_end_parallel - t_start_parallel
+
+c(diff_loop, diff_parallel) # show times
+identical(m_results, m_results_parallel) # check whether identical
+```
