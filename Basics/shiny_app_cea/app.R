@@ -6,6 +6,7 @@
 rm(list= ls())
 library(shiny)
 library(tidyverse)
+#library(plotly)
 
 # Load function
 source("fct_bootstrap.R")
@@ -322,13 +323,15 @@ ui <- fluidPage(
                column(
                  width = 7,
                  h3("Incremental cost-effectiveness plane"),
-                 plotOutput("ice_pa"),
+                 plotOutput("ice_pa", hover = "plot_hover", brush = "plot_brush"),
+                 verbatimTextOutput("hover_info"),
                  tags$hr()
                ),
                column(
                  width = 5,
                  h3("Incremental cost-effectiveness plane - summary statistics"),
                  tableOutput("tbl_ice_pa"),
+                 verbatimTextOutput("brush_info"),
                  tags$hr()
                ),
                column(
@@ -345,9 +348,25 @@ ui <- fluidPage(
                )
              )
              
+    ),
+    tabPanel("Assignment HSTM 2C - exploration", fluid = TRUE,
+             fluidPage(
+               column(width = 6,
+                      plotOutput("plot_eff_inputs", brush = "brush_eff")
+               ),
+               column(width = 6,
+                      plotOutput("ice_highlight")
+               ),
+               column(width = 6,
+                      plotOutput("plot_eff_mi_iQALY")
+               ),
+               column(width = 6,
+                      plotOutput("plot_eff_stroke_iQALY")
+             )
+             )
+             )
     )
-    )
-  )
+)
 
 # Define server logic ----
 server <- function(input, output) {
@@ -1264,7 +1283,7 @@ digits = 3)
 
 output$ce_pa <- renderPlot({
   m_res <- l_res_pa()$m_res_pa
-  
+
   df_res <- as.data.frame(m_res)
   
   df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
@@ -1319,6 +1338,33 @@ output$ice_pa <- renderPlot({
     theme(legend.position="bottom") 
   
 })
+
+output$hover_info <- renderPrint({
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  nearPoints(df_inputs_outputs, input$plot_hover, xvar = "Inc_QALY", yvar = "Inc_C", maxpoints = 1, threshold = 10)
+  
+})
+
+output$brush_info <- renderPrint({
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  df <- brushedPoints(df_inputs_outputs, input$plot_brush, xvar = "Inc_QALY", yvar = "Inc_C")
+  summary(df)
+  
+})
+
+
 output$ceac_pa <- renderPlot({
   m_res <- l_res_pa()$m_res_pa
   
@@ -1387,6 +1433,120 @@ output$tbl_ceac <- renderTable({
   
 },
 digits = 0)
+
+output$plot_eff_inputs <- renderPlot({
+  
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  ggplot(df_inputs_outputs) + 
+    #ggtitle("Incremental cost-effectiveness plane") +
+    geom_point(aes(x = eff_mi, y = eff_stroke), shape = 1) + 
+    xlab ("Effectiveness aspirin on occurence of MI") + 
+    ylab("Effectiveness aspirin on occurence of stroke") +
+    xlim(min(df_inputs_outputs$eff_mi), max(df_inputs_outputs$eff_mi)) +
+    ylim(min(df_inputs_outputs$eff_stroke), max(df_inputs_outputs$eff_stroke)) +
+    geom_hline(yintercept = 0,  
+               color = "black") +
+    geom_vline(xintercept = 0,  
+               color = "black") + 
+    theme_bw() 
+  
+  })
+
+
+output$ice_highlight <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  brushed_points <- brushedPoints(df_inputs_outputs, input$brush_eff)
+  
+  p <- ggplot(df_inputs_outputs) + 
+    #ggtitle("Incremental cost-effectiveness plane") +
+    geom_point(aes(x = Inc_QALY, y = Inc_C, colour = "Incrementals"), shape = 1) + 
+    geom_point(aes(x = mean(Inc_QALY), y = mean(Inc_C), colour = "Incrementals(mean)"), size = 2) +
+    xlab ("Incremental QALY") + 
+    ylab("Incremental costs") +
+    geom_hline(yintercept = 0,  
+               color = "black") +
+    geom_vline(xintercept = 0,  
+               color = "black") + 
+    geom_abline(intercept = 0, slope = 20000, linetype= "dashed", 
+                color = "black") + # 20,000 per QALY threshold line
+    #xlim(c(0,1)) +
+    scale_colour_manual(name = "",
+                        values = c(Incrementals = "orange", 
+                                   `Incrementals(mean)` = "darkblue"
+                        )) +
+    theme_bw() + 
+    theme(legend.position="bottom") 
+  
+  if(!is.null(input$brush_eff)){
+    p <- ggplot(df_inputs_outputs) + 
+      #ggtitle("Incremental cost-effectiveness plane") +
+      geom_point(aes(x = Inc_QALY, y = Inc_C, colour = "Incrementals"), shape = 1) + 
+      geom_point(aes(x = mean(Inc_QALY), y = mean(Inc_C), colour = "Incrementals(mean)"), size = 2) +
+      geom_point(data = brushed_points, aes(x = Inc_QALY, y = Inc_C, colour = "Brushed"), shape = 16) +
+      xlab ("Incremental QALY") + 
+      ylab("Incremental costs") +
+      geom_hline(yintercept = 0,  
+                 color = "black") +
+      geom_vline(xintercept = 0,  
+                 color = "black") + 
+      geom_abline(intercept = 0, slope = 20000, linetype= "dashed", 
+                  color = "black") + # 20,000 per QALY threshold line
+      #xlim(c(0,1)) +
+      scale_colour_manual(name = "",
+                          values = c(Incrementals = "orange", 
+                                     `Incrementals(mean)` = "darkblue", 
+                                     Brushed = "red"
+                          )) +
+      theme_bw() + 
+      theme(legend.position="bottom") 
+
+  }
+  
+  p
+  
+})
+
+output$plot_eff_mi_iQALY <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  lm_eff_mi <- lm(Inc_QALY ~ eff_mi, data = df_inputs_outputs)
+  
+  plot(lm_eff_mi)
+  
+})
+
+
+output$plot_eff_stroke_iQALY <- renderPlot({
+  m_res <- l_res_pa()$m_res_pa
+  df_res <- as.data.frame(m_res)
+  df_res$Inc_QALY <- df_res$QALY_int - df_res$QALY_comp
+  df_res$Inc_C <- df_res$Costs_int - df_res$Costs_comp
+  df_inputs <- l_res_pa()$df_inputs_pa
+  df_inputs_outputs <- cbind(df_inputs, df_res)
+  
+  lm_eff_stroke <- lm(Inc_QALY ~ eff_stroke, data = df_inputs_outputs)
+  
+  plot(lm_eff_stroke)
+  
+})
+
 
 }
 

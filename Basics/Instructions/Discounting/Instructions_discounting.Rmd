@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Aim
-This assignment aims to introduce you to the concept of discounting in health economic evaluations, using a fictive examples containing 3 interventions.    
+This assignment aims to introduce you to the concept of discounting in health economic evaluations, using a fictive example containing 3 interventions.    
 
 # Required packages
 
