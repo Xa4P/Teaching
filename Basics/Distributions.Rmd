@@ -3,13 +3,13 @@ title: "Distributions"
 author: "X. Pouwels"
 date: "`r Sys.Date()`"
 output:
+  
+  pdf_document:
+    toc: yes
   html_document:
     toc: yes
     toc_collapsed: yes
     toc_float: yes
-  pdf_document:
-    toc: yes
-  
 ---
 
 ```{r setup, include=FALSE}
@@ -286,14 +286,14 @@ dist_beta
 The above-fitted distribution matches the three percentiles quite nicely, because we have controlled the data generating process, by using a beta distribution. However, sometimes, you may not know which type of distribution is underlying the percentiles that you have identified in the literature. So, what would happen in case you do not fit an appropriate distribution, let's have a look! In the below code, we'll fit a lognormal distribution to the three percentiles
 
 ```{r, echo = TRUE}
-dist_2 <- get.lnorm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit gamma distribution based on quantiles
+dist_2 <- get.lnorm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit lognormal distribution based on quantiles
 dist_2
 ```
 
 As you can see from this graph, the distribution does not fits as nicely as the beta. If we fit a normal or loglogistic distribution, we may also get negative values (see below), which may not be suitable if the distribution should represent a probability for instance. Hence, always think about the properties of your input parameters before fitting a distribution using percentiles.
 
 ```{r, echo = TRUE}
-dist_3 <- get.norm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit gamma distribution based on quantiles
+dist_3 <- get.norm.par(p = c(0.25, 0.5, 0.75), q = v_quantiles, show.output = FALSE) # fit normal distribution based on quantiles
 dist_3
 ```
 
