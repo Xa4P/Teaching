@@ -3,12 +3,12 @@ title: "Probabilistic analysis"
 author: "X. Pouwels"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     toc: yes
     toc_collapsed: yes
     toc_float: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +36,7 @@ library(ggplot2)
 ```
 
 # Deterministic analysis
-Imagine you are interested in calculating the average time this group of student takes to get home from the UT by bicycle, bus, and train. Based on the measurement of travel time (and train delay) in 100 students on the 1st of February 2020, you obtain the following statistics (times are displayed in minutes) :  
+Imagine you are interested in calculating the average time a group of student takes to get home from the UT by bicycle, bus, and train. Based on the measurement of travel time (and train delay) in 100 students on the 1st of February 2020, you obtain the following statistics (times are displayed in minutes) :  
 
 | Statistic | Time bicycle > bus | Time bus > trainstation | Chance train is delayed | Time in train (no delay) |	Time in train (with delay) | Total time |
 |:-----|:-----|:------------|:--------------|:-------|:-----|:-----|
@@ -47,14 +47,16 @@ Imagine you are interested in calculating the average time this group of student
 The mean travel time is 69.5 minutes [calculated as: Time bicycle > bus + Time bus > trainstation + Chance train is delayed * Time in train (with delay) + (1-Chance train is delayed) * Time in train (no delay)]. However, this number may not represent the true average travel time because none of the times and chances elicited in this survey are fixed. These parameters are random variables which are, by definition, uncertain. This uncertainty (and its consequences) can be assessed though probabilistic analyses (PA).  
 
 # Probabilistic analysis
-In health economic modelling, PA are mostly performed through Monte Carlo sampling (or simulation). During a Monte Carlo simulation, random values are drawn from the variables used to calculate the (health economic) outcomes. These random values are then used to recalculate the outcomes of the model. This process is repeated a high amount of time (at least 1,000 times) to compute a set of potential outcomes. This set of outcome is used to assess the uncertainty (and its consequences) surrounding the results of the analysis.  
+In health economic modelling, PA are mostly performed through Monte Carlo sampling (or simulation). During a Monte Carlo simulation, random values are drawn from the variables used to calculate the (health economic) outcomes. These random values are then used to recalculate the outcomes of the model. This process is repeated a large amount of time (at least 1,000 times) to compute a set of potential outcomes. This set of outcome is used to assess the uncertainty (and its consequences) surrounding the results of the analysis.  
 Now, let's get back to our 'travel time' example. As you can see, each input parameter is characterised by a mean value (that was used to calculate the deterministic output),  a standard deviation (SD), and a type of distribution has been assigned to it. By using the method of moments, these parameters can be used to obtain the parameters of distributions representing each random variable.
 ```{r, echo = T}
-v_bitobus <- rnorm(2500, mean = 15, sd = 2) # draw 2,500 random values from a normal distribution for time bicycle > bus
-v_bustotr <- runif(2500, min = 10, max = 30) # draw 2,500 random values from a uniform distribution for time bus > train
-v_delay   <- rbeta(2500, shape1 = 15, shape2 = 85) # draw 2,500 random values from a beta distribution for chance delayed train
-v_trainnod <- rgamma(2500, shape = 300, rate = 10) # draw 2,500 random values from a gamma distribution for time train (no delay)
-v_trainwd  <- rgamma(2500, shape = 60, rate = 1) # draw 2,500 random values from a gamma distribution for time train (with delay)
+n_it <- 2500
+
+v_bitobus <- rnorm(n_it, mean = 15, sd = 2) # draw 2,500 random values from a normal distribution for time bicycle > bus
+v_bustotr <- runif(n_it, min = 10, max = 30) # draw 2,500 random values from a uniform distribution for time bus > train
+v_delay   <- rbeta(n_it, shape1 = 15, shape2 = 85) # draw 2,500 random values from a beta distribution for chance delayed train
+v_trainnod <- rgamma(n_it, shape = 300, rate = 10) # draw 2,500 random values from a gamma distribution for time train (no delay)
+v_trainwd  <- rgamma(n_it, shape = 60, rate = 1) # draw 2,500 random values from a gamma distribution for time train (with delay)
 v_total <- v_bitobus + v_bustotr + v_delay * v_trainwd + (1 - v_delay) * v_trainnod # calculate total time for each iteration
 ```
 
@@ -81,7 +83,7 @@ axis(side = 4, at = pretty(c(0:1)))      # Add second axis
 mtext("Cumulative probability", side = 4, line = 3)  
 ```
 
-We can also investigate the distribution of the total travel time by visualising the hitogram and cumulative probability of each outcome. Based on this information, we are able to calculate the probability that you would be home within or after a certain travel time, for instance. The table below describes the probability that the travel time of students are below 60 minutes, between 64 and 72 minutes, above 76 minutes. These are of course examples and could be calculated for each value.  
+We can also investigate the distribution of the total travel time by visualising the histogram and cumulative probability of each outcome. Based on this information, we are able to calculate the probability that a student would be home within or after a certain travel time, for instance. The table below describes the probability that the travel time of students is below 60 minutes, between 64 and 72 minutes, and above 76 minutes. These probabilities can be calculated for each potential value of the travel time.  
 
 | Interval    | Probability                                                                                                   |  
 |:-----|:-----|  
