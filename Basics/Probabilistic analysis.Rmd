@@ -51,6 +51,7 @@ In health economic modelling, PA are mostly performed through Monte Carlo sampli
 Now, let's get back to our 'travel time' example. As you can see, each input parameter is characterised by a mean value (that was used to calculate the deterministic output),  a standard deviation (SD), and a type of distribution has been assigned to it. By using the method of moments, these parameters can be used to obtain the parameters of distributions representing each random variable.
 ```{r, echo = T}
 n_it <- 2500
+set.seed(500)
 
 v_bitobus <- rnorm(n_it, mean = 15, sd = 2) # draw 2,500 random values from a normal distribution for time bicycle > bus
 v_bustotr <- runif(n_it, min = 10, max = 30) # draw 2,500 random values from a uniform distribution for time bus > train
@@ -71,14 +72,24 @@ To investigate whether the random values represent adequately the random variabl
 | PA SD |`r round(sd(v_bitobus), 3)`|`r round(sd(v_bustotr), 3)`|`r round(sd(v_delay), 3)`|`r round(sd(v_trainnod), 3)`|`r round(sd(v_trainwd), 3)`|`r round(sd(v_total), 3)`|  
 
 ```{r, echo = TRUE}
-histo <- hist(v_total, breaks = seq(from = 30, to = 90, by = 1), plot = FALSE) # register histogram values
-
+histo <- hist(v_total, 
+              breaks = seq(from = floor(min(v_total)), to = ceiling(max(v_total)), by = 1), 
+              plot = FALSE) # register histogram values
 #create plot with histogram and cumulative probability
 par(mar = c(5, 4, 4, 4) + 0.3) 
-hist(v_total, main = "Histogram Monte Carlo simulation", xlab = "Total travel time")
+hist(v_total, 
+     main = "Histogram Monte Carlo simulation", 
+     xlab = "Total travel time", 
+     xlim = c(floor(min(v_total)), ceiling(max(v_total))))
 par(new = TRUE)
-plot(x = histo$mids, y = cumsum(histo$counts) / sum(histo$counts), type = 'l', col = 'darkblue', 
-     axes = FALSE, xlab = "", ylab = "")# Create second plot without axes
+plot(x = histo$mids, 
+     y = cumsum(histo$counts) / sum(histo$counts), 
+     type = 'l', 
+     col = 'darkblue', 
+     axes = FALSE, 
+     xlab = "", 
+     ylab = "",
+     xlim = c(floor(min(v_total)), ceiling(max(v_total))))# Create second plot without axes
 axis(side = 4, at = pretty(c(0:1)))      # Add second axis
 mtext("Cumulative probability", side = 4, line = 3)  
 ```
