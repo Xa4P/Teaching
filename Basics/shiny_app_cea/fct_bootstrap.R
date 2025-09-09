@@ -12,13 +12,14 @@ bootstrap_effects_costs <- function(df, num_it = 5000) {
   
   for(i in 1:num_it){
     n_pt <- nrow(df[which(df$Procedure == 1),]) # number of patients in each group
-    v_id <- sample(x = 1:n_pt, size = n_pt, replace = TRUE)# vector of patient to select to compute
+    v_id <- sample(x = 1:n_pt, size = n_pt, replace = TRUE)# vector of patient to select to compute - open
+    v_id_robot <- sample(x = 1:n_pt, size = n_pt, replace = TRUE)# vector of patient to select to compute - robot
     
     # Select participants in each group
-    df_open <- subset(df, df$Procedure == 1)
+    df_open <- subset(df, df$Procedure == 0)
     df_open <- df_open[v_id,]
-    df_robot <- subset(df, df$Procedure == 2)
-    df_robot <- df_robot[v_id,]
+    df_robot <- subset(df, df$Procedure == 1)
+    df_robot <- df_robot[v_id_robot,]
     
     df_boot <- rbind(df_open, df_robot)
     
