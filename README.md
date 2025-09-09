@@ -1,5 +1,8 @@
 # Teaching
-This repository aims at storing the codes I show during my teaching activities
+This repository aims at storing the codes I show and use during my teaching activities.  
 
-The 'Distributions.Rmd' aims at showing students how to fit data using the [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) package, the methods of moments, and how to use the [`rriskDistributions`](https://cran.r-project.org/web/packages/rriskDistributions/index.html) package to fit distributions based on quantiles.
-It futher shows how to use the [`flexsurv`](https://cran.r-project.org/web/packages/flexsurv/index.html) package to fit parametric survival models using the `bc` dataset.
+Under the 'Basics' folder, one can find different markdown documents and their outputs concerning different aspects of health economic evaluations such as:  
+- "Distributions": show how to (assess the statistical) fit different distributions on individual-level data,  
+- "Example_code": show different implementation of health state transition model in R,  
+- "Probabilistic-analysis": contain an example of a probabilistic analysis,  
+- "Advanced_topics": show how hyperparameters of parameter distributions can be varied in a individual-level simulation.  
